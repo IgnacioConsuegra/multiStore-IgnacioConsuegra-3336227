@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hero Section</title>
+    <link rel="stylesheet" href="./vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="./vendor/all.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+    <div id="navbar-container"></div>
+
+    <section class="hero-section ">
+        <!-- Background Image with Overlay -->
+        <div class="hero-bg">
+            <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=1920" alt="Library">
+            <div class="hero-overlay"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="hero-container">
+            <div class="hero-content animate-fade-in">
+
+                <!-- Est. 2024 -->
+                <div class="est-wrapper">
+                    <div class="est-line"></div>
+                    <span class="est-text">Est. 2024</span>
+                </div>
+
+                <!-- Main Heading -->
+                <h1 class="hero-title">Where Wisdom<br>Meets Style</h1>
+
+                <!-- Paragraph -->
+                <p class="hero-paragraph">
+                    Curating timeless pieces for the modern scholar. Discover a
+                    collection that honors tradition while embracing contemporary
+                    elegance.
+                </p>
+
+                <!-- Action Buttons -->
+                <div class="hero-buttons">
+                    <a href="/products" class="btn-custom-primary heroMainBtn">
+                        Explore Collection
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                            class="btn-icon">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </a>
+
+                    <a href="/products" class="btn-custom-outline">
+                        New Arrivals
+                    </a>
+                </div>
+
+                <!-- Stats -->
+                <div class="hero-stats">
+                    <div>
+                        <p class="stat-number">500+</p>
+                        <p class="stat-label">Curated Pieces</p>
+                    </div>
+                    <div>
+                        <p class="stat-number">98%</p>
+                        <p class="stat-label">Satisfaction</p>
+                    </div>
+                    <div>
+                        <p class="stat-number">5K+</p>
+                        <p class="stat-label">Scholars</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator animate-bounce">
+            <div class="mouse-scroll">
+                <div class="mouse-wheel"></div>
+            </div>
+        </div>
+    </section>
+    <div id="footer-container"></div>
+
+    <script src="./js/fetchNavBar.js"></script>
+    <script src="vendor/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,46 @@
+:root {
+    --bg-color: #F4F1EA;
+    --btn-color: #3f523e;
+    --input-bg: #ffffff;
+    --text-dark: #1a1a1a;
+    --paper: #ffffff;
+    --academia: #2C2420;
+    --gold: #B8860B;
+    --blue: #007CBE;
+    --paper-70: rgba(255, 255, 255, 0.7);
+    --paper-60: rgba(255, 255, 255, 0.6);
+    --paper-10: rgba(255, 255, 255, 0.1);
+}
+
+
+.font-heading {
+    font-family: 'Playfair Display', serif;
+}
+
+.navbar-nav-link {
+    color: var(--text-dark);
+    text-decoration: none;
+    font-size: 0.95rem;
+    padding-bottom: 2px;
+    transition: opacity 0.2s;
+}
+
+.myNavBar {
+    background-color: var(--bg-color);
+}
+
+.navbar-nav-link:hover {
+    opacity: 0.7;
+}
+
+.nav-active {
+    border-bottom: 1.5px solid var(--text-dark);
+}
+
+.icon-placeholder {
+    background-color: #e5e5e5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #b3b3b3;
+}

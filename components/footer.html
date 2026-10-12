@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Archivos Locales en Vendor -->
+    <link rel="stylesheet" href="../vendor/bootstrap.min.css">
+    <link rel="stylesheet" href="../vendor/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS del Footer -->
+    <link rel="stylesheet" href="../css/footer.css">
+</head>
+<body>
+
+
+    <footer class="footer-academia ">
+        <div class="container py-5">
+            <div class="row gy-5">
+                
+                <!-- Brand Info (Ocupa 2 columnas en desktop) -->
+                <div class="col-12 col-md-6">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="brand-icon-box rounded-1 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-book-open text-white fs-5"></i>
+                        </div>
+                        <div>
+                            <h2 class="font-heading h5 fw-bold mb-0 text-white">Academia Clothier</h2>
+                            <p class="text-paper-60 text-uppercase tracking-widest mb-0" style="font-size: 0.75rem;">Est. 2024</p>
+                        </div>
+                    </div>
+                    
+                    <p class="text-paper-70 fs-6 lh-lg mb-4 pe-md-4">
+                        Curating timeless pieces for the modern scholar. Where classic elegance meets contemporary refinement.
+                    </p>
+                    
+                    <div class="d-flex flex-column gap-3 fs-6">
+                        <div class="d-flex align-items-center gap-3 text-paper-70">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span>123 Oxford Street, London, UK</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 text-paper-70">
+                            <i class="fa-solid fa-phone"></i>
+                            <span>+44 20 1234 5678</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 text-paper-70">
+                            <i class="fa-solid fa-envelope"></i>
+                            <span>contact@academiaclothier.com</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="col-12 col-md-3">
+                    <h3 class="font-heading h5 fw-semibold text-white mb-4">Quick Links</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
+                        <li><a href="/products" class="footer-link">Shop All</a></li>
+                        <li><a href="/products" class="footer-link">New Arrivals</a></li>
+                        <li><a href="/products" class="footer-link">Collections</a></li>
+                        <li><a href="#" class="footer-link">About Us</a></li>
+                    </ul>
+                </div>
+
+                <!-- Customer Care -->
+                <div class="col-12 col-md-3">
+                    <h3 class="font-heading h5 fw-semibold text-white mb-4">Customer Care</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
+                        <li><a href="#" class="footer-link">Contact Us</a></li>
+                        <li><a href="#" class="footer-link">Shipping Info</a></li>
+                        <li><a href="#" class="footer-link">Returns</a></li>
+                        <li><a href="#" class="footer-link">Size Guide</a></li>
+                        <li><a href="#" class="footer-link">FAQ</a></li>
+                    </ul>
+                </div>
+
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="footer-bottom border-top mt-5 pt-4 d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                <p class="text-paper-60 mb-0" style="font-size: 0.875rem;">
+                    &copy; <span id="current-year"></span> Academia Clothier. All rights reserved.
+                </p>
+                <div class="d-flex gap-4">
+                    <a href="#" class="footer-link-muted">Privacy Policy</a>
+                    <a href="#" class="footer-link-muted">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="../vendor/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html>

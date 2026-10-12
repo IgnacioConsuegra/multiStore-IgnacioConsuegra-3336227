@@ -1,0 +1,55 @@
+
+
+.font-heading {
+    font-family: 'Playfair Display', serif;
+}
+
+.footer-academia {
+    background-color: var(--academia);
+    color: var(--paper);
+}
+
+.tracking-widest {
+    letter-spacing: 0.15em;
+}
+
+.text-paper-70 { color: var(--paper-70); }
+.text-paper-60 { color: var(--paper-60); }
+
+.brand-icon-box {
+    width: 2.5rem; 
+    height: 2.5rem; 
+    background-color: var(--primary);
+    transition: transform 0.2s ease;
+}
+
+.footer-link {
+    color: var(--paper-70);
+    text-decoration: none;
+    font-size: 0.875rem; 
+    transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+    color: var(--paper);
+}
+
+.footer-link-muted {
+    color: var(--paper-60);
+    text-decoration: none;
+    font-size: 0.875rem; 
+    transition: color 0.3s ease;
+}
+
+.footer-link-muted:hover {
+    color: var(--paper);
+}
+
+.footer-bottom {
+    border-color: var(--paper-10) !important;
+}
+
+.footer-academia i {
+    width: 1.25rem; 
+    text-align: center;
+}

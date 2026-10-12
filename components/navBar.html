@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navbar Preview</title>
+    
+    <!-- Archivos Locales en Vendor -->
+    <link href="../vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../vendor/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS del Componente -->
+    <link rel="stylesheet" href="../css/navBar.css">
+</head>
+<body>
+
+    <nav class="navbar myNavBar navbar-expand px-4 py-4">
+        <div class="container-fluid px-0 d-flex justify-content-between align-items-center">
+            
+            <!-- Left: Logo and Brand -->
+<a href="../index.html" class="d-flex align-items-center gap-3 text-decoration-none text-dark">
+    <div class="icon-placeholder rounded-1" style="width: 36px; height: 36px;">
+        <i class="fa-regular fa-image fs-6"></i>
+    </div>
+    <h4 class="mb-0 font-heading fw-bold">Business</h4>
+</a>
+
+            <!-- Center: Navigation Links -->
+            <div class="d-none d-md-flex gap-4">
+                <a href="../index.html" class="navbar-nav-link nav-active">Home</a>
+                <a href="../views/categories.html" class="navbar-nav-link">Categories</a>
+                <a href="../views/about.html" class="navbar-nav-link">About</a>
+            </div>
+
+            <!-- Right: Action Icons -->
+            <div class="d-flex gap-4 align-items-center fs-5 text-dark">
+                <a href="#" class="text-dark"><i class="fa-solid fa-magnifying-glass"></i></a>
+                <a href="#" class="text-dark"><i class="fa-solid fa-cart-shopping"></i></a>
+                <a href="../views/login.html" class="text-dark"><i class="fa-regular fa-user"></i></a>
+            </div>
+
+        </div>
+    </nav>
+
+    <script src="../vendor/bootstrap.bundle.min.js"></script>
+</body>
+</html>
