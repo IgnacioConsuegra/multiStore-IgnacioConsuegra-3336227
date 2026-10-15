@@ -170,51 +170,53 @@
             </div>
         </div>
     </section>
-    
+
 
     <hr style="border-color: var(--gold)">
 
-<section class="py-5 features-section">
-    <div class="container py-4">
-        
-        <!-- Header Section -->
-        <div class="d-flex align-items-end justify-content-between mb-5">
-            <div>
-                <h2 class="font-heading fw-bold text-dark-custom mb-3" style="font-size: 2.5rem;">
-                    Featured Collection
-                </h2>
-                <p class="fs-5 text-muted-custom mb-0">
-                    Handpicked essentials for the discerning scholar
-                </p>
+    <section class="py-5 features-section">
+        <div class="container py-4">
+
+            <!-- Header Section -->
+            <div class="d-flex align-items-end justify-content-between mb-5">
+                <div>
+                    <h2 class="font-heading fw-bold text-dark-custom mb-3" style="font-size: 2.5rem;">
+                        Featured Collection
+                    </h2>
+                    <p class="fs-5 text-muted-custom mb-0">
+                        Handpicked essentials for the discerning scholar
+                    </p>
+                </div>
+
+                <!-- Desktop View All Link -->
+                <a href="/views/collections.html"
+                    class="d-none d-md-inline-flex align-items-center text-dark-custom text-decoration-none fw-medium link-hover-gap">
+                    View All <i class="fa-solid fa-arrow-right fs-6"></i>
+                </a>
             </div>
-            
-            <!-- Desktop View All Link -->
-            <a href="/views/collections.html" class="d-none d-md-inline-flex align-items-center text-dark-custom text-decoration-none fw-medium link-hover-gap">
-                View All <i class="fa-solid fa-arrow-right fs-6"></i>
-            </a>
-        </div>
 
-        <!-- Products Grid (Vacio para que JS inyecte los datos) -->
-        <div class="row g-4" id="featured-products-grid">
-            <!-- Las tarjetas de producto se cargarán aquí dinámicamente desde main.js -->
-        </div>
+            <!-- Products Grid (Vacio para que JS inyecte los datos) -->
+            <div class="row g-4" id="featured-products-grid">
+                <!-- Las tarjetas de producto se cargarán aquí dinámicamente desde main.js -->
+            </div>
 
-        <!-- Mobile View All Link -->
-        <div class="text-center mt-5 d-block d-md-none">
-            <a href="/views/collections.html" class="d-inline-flex align-items-center text-dark-custom text-decoration-none fw-medium link-hover-gap">
-                View All Products <i class="fa-solid fa-arrow-right fs-6"></i>
-            </a>
-        </div>
+            <!-- Mobile View All Link -->
+            <div class="text-center mt-5 d-block d-md-none">
+                <a href="/views/collections.html"
+                    class="d-inline-flex align-items-center text-dark-custom text-decoration-none fw-medium link-hover-gap">
+                    View All Products <i class="fa-solid fa-arrow-right fs-6"></i>
+                </a>
+            </div>
 
-    </div>
-</section>
+        </div>
+    </section>
 
     <div id="footer-container"></div>
-
+    <script src="
+    ./js/navbar.js"></script>
     <script src="./js/fetchNavBar.js"></script>
     <script src="./js/loadProducts.js"></script>
     <script src="vendor/bootstrap.bundle.min.js"></script>
-
 </body>
 
 </html>

@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submit-btn');
 
     signupForm.addEventListener('submit', (e) => {
-           window.location.href = "../views/login.html"; 
         e.preventDefault(); // Evita que la página se recargue
 
         // Resetear mensajes de error
@@ -36,13 +35,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 3. Crear el objeto usuario
         const userData = {
-            id: Date.now().toString(), // Genera un ID simple
+            id: Date.now().toString(),
             name: name,
             email: email,
             phone: phone,
-            password: password, // En un entorno real, las contraseñas no se guardan en texto plano
+            password: password,
             address: {
                 street: street,
                 city: city,
@@ -50,21 +48,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 zipCode: zipCode,
                 country: country
             },
+            role: "Admin", 
             createdAt: new Date().toISOString()
         };
 
-        // 4. Simular estado de "Cargando"
         submitBtn.disabled = true;
         submitBtn.textContent = 'Creating account...';
+        localStorage.setItem('user', JSON.stringify(userData));
 
-        // Usamos setTimeout para simular un pequeño retraso de red (opcional, para dar mejor UX)
         setTimeout(() => {
             try {
-                // 5. Guardar en localStorage
-                localStorage.setItem('user', JSON.stringify(userData));
                 
-                // 6. Redirigir o limpiar
-                console.log("Usuario guardado en localStorage:", userData);
                 alert("Account created successfully!");
                 
                 // Si tienes la página index o login, puedes redirigir así:
@@ -74,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Account';
                 signupForm.reset();
-                 window.location.href = "../views/login.html"; // Redirige a la página de login después de crear la cuenta
+                window.location.href = "../index.html"; 
 
             } catch (error) {
                 showError("An error occurred while saving your data.");

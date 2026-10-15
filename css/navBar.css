@@ -5,42 +5,138 @@
     --text-dark: #1a1a1a;
     --paper: #ffffff;
     --academia: #2C2420;
-    --gold: #B8860B;
-    --blue: #007CBE;
-    --paper-70: rgba(255, 255, 255, 0.7);
-    --paper-60: rgba(255, 255, 255, 0.6);
-    --paper-10: rgba(255, 255, 255, 0.1);
+    --border-color: #e5e5e5;
+    --accent: #B8860B; /* Ajusta según el color "accent" de tu badge */
 }
 
-
-.font-heading {
-    font-family: 'Playfair Display', serif;
+/* Base NavBar */
+.navbar-custom {
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid rgba(44, 36, 32, 0.1);
+    z-index: 1050;
 }
 
-.navbar-nav-link {
+.h-80px {
+    height: 80px;
+}
+
+.bg-primary-custom { background-color: var(--btn-color); }
+.bg-accent-custom { background-color: var(--accent); color: var(--paper); }
+.text-dark-custom { color: var(--text-dark); }
+.text-muted-custom { color: #6c757d; }
+.custom-border-light { border-color: rgba(44, 36, 32, 0.1) !important; }
+
+/* Logo Animation */
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 2px;
+    transition: transform 0.2s ease;
+}
+.logo-group:hover .logo-icon {
+    transform: scale(1.05);
+}
+
+/* Desktop Navigation Links */
+.nav-link-custom {
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    text-decoration: none;
+    position: relative;
+    padding-bottom: 2px;
+    transition: color 0.2s ease;
+}
+
+.nav-link-custom:hover {
+    color: var(--text-dark) !important;
+}
+
+.nav-link-custom::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: var(--btn-color);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.nav-link-custom:hover::after,
+.nav-link-custom.active::after {
+    transform: scaleX(1);
+}
+
+/* Action Buttons */
+.action-btn {
+    padding: 0.5rem;
+    transition: color 0.2s ease;
+}
+.action-btn:hover {
+    color: var(--text-dark) !important;
+}
+
+/* --- User Dropdown --- */
+.user-group {
+    position: relative;
+}
+
+.user-dropdown {
+    position: absolute;
+    right: 0;
+    top: 100%;
+    margin-top: 1rem;
+    width: 12rem;
+    background-color: var(--paper);
+    border: 1px solid rgba(44, 36, 32, 0.1);
+    border-radius: 2px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+}
+
+.user-group:hover .user-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    margin-top: 0.5rem;
+}
+
+.dropdown-item-custom {
+    display: block;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
     color: var(--text-dark);
     text-decoration: none;
-    font-size: 0.95rem;
-    padding-bottom: 2px;
-    transition: opacity 0.2s;
+    transition: background-color 0.2s;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
 }
 
-.myNavBar {
-    background-color: var(--bg-color);
+.dropdown-item-custom:hover {
+    background-color: rgba(63, 82, 62, 0.05); /* --btn-color with low opacity */
 }
 
-.navbar-nav-link:hover {
-    opacity: 0.7;
+.btn-signin {
+    background-color: var(--academia);
+    color: var(--paper);
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
 }
-
-.nav-active {
-    border-bottom: 1.5px solid var(--text-dark);
-}
-
-.icon-placeholder {
-    /* background-color: #e5e5e5; */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #b3b3b3;
+.btn-signin:hover {
+    background-color: var(--btn-color);
+    color: var(--paper);
 }

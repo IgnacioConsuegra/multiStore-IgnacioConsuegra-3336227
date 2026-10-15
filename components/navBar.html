@@ -23,35 +23,74 @@
 
 <body>
 
-    <nav class="navbar myNavBar navbar-expand px-4 py-4">
-        <div class="container-fluid px-0 d-flex justify-content-between align-items-center">
-
-            <!-- Left: Logo and Brand -->
-            <a href="../index.html" class="d-flex align-items-center gap-3 text-decoration-none text-dark">
-                <div class="icon-placeholder rounded-1" style="width: 36px; height: 36px;">
-                    <i class="fa-regular fa-image fs-6"></i>
+   <!-- En tu <head> asegúrate de tener Bootstrap, FontAwesome y tu navbar.css -->
+<header class="navbar-custom sticky-top">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between h-80px">
+            
+            <!-- Logo -->
+            <a href="/" class="d-flex align-items-center gap-3 text-decoration-none logo-group">
+                <div class="logo-icon bg-primary-custom d-flex align-items-center justify-content-center">
+                    <i class="fa-solid fa-book-open text-white fs-5"></i>
                 </div>
-                <h4 class="mb-0 font-heading fw-bold">Business</h4>
+                <div class="d-none d-sm-block">
+                    <h1 class="font-heading fw-bold text-dark-custom mb-0 fs-4 lh-1 tracking-tight">Academia</h1>
+                    <p class="text-muted-custom mb-0" style="font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;">Clothier</p>
+                </div>
             </a>
 
-            <!-- Center: Navigation Links -->
-            <div class="d-none d-md-flex gap-4">
-                <a href="../index.html" class="navbar-nav-link nav-active">Home</a>
-                <a href="../views/collections.html" class="navbar-nav-link">Collections</a>
-                <a href="../views/about.html" class="navbar-nav-link">About</a>
-            </div>
+            <!-- Desktop Navigation -->
+            <nav class="d-none d-md-flex align-items-center gap-4 desktop-nav">
+                <a href="/" class="nav-link-custom text-dark-custom active">Home</a>
+                <a href="/products" class="nav-link-custom text-muted-custom">Shop</a>
+                <a href="/collections" class="nav-link-custom text-muted-custom">Collections</a>
+                <a href="/about" class="nav-link-custom text-muted-custom">About</a>
+            </nav>
 
-            <!-- Right: Action Icons -->
-            <div class="d-flex gap-4 align-items-center fs-5 text-dark">
-                <a href="#" class="text-dark"><i class="fa-solid fa-magnifying-glass"></i></a>
-                <a href="#" class="text-dark"><i class="fa-solid fa-cart-shopping"></i></a>
-                <a href="../views/login.html" class="text-dark"><i class="fa-regular fa-user"></i></a>
-            </div>
+            <!-- Actions -->
+            <div class="d-flex align-items-center gap-3">
+                
+                <!-- Search -->
+                <a href="/products" class="action-btn text-muted-custom text-decoration-none" aria-label="Search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </a>
 
+                <!-- Cart -->
+                <a href="/cart" class="action-btn text-muted-custom text-decoration-none position-relative" aria-label="Shopping Cart">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-accent-custom d-none" style="font-size: 0.6rem;">
+                        0
+                    </span>
+                </a>
+
+                <!-- Contenedor dinámico para Usuario o Sign In -->
+                <div id="user-actions-container" class="d-flex align-items-center">
+                    <!-- JS inyectará el dropdown del usuario o el botón de Login aquí -->
+                </div>
+
+                <!-- Mobile Menu Toggle Button -->
+                <button id="mobile-menu-btn" class="btn d-md-none text-muted-custom border-0 p-2 shadow-none" aria-label="Toggle menu">
+                    <i id="mobile-menu-icon" class="fa-solid fa-bars fs-5"></i>
+                </button>
+            </div>
         </div>
-    </nav>
+
+        <!-- Mobile Menu (Oculto por defecto) -->
+        <div id="mobile-menu" class="d-none d-md-none border-top custom-border-light py-3 animate-slide-in">
+            <nav class="d-flex flex-column gap-3" id="mobile-nav-container">
+                <a href="/" class="text-decoration-none text-dark-custom fw-medium small">Home</a>
+                <a href="/products" class="text-decoration-none text-muted-custom fw-medium small">Shop</a>
+                <a href="/collections" class="text-decoration-none text-muted-custom fw-medium small">Collections</a>
+                <a href="/about" class="text-decoration-none text-muted-custom fw-medium small">About</a>
+                
+                <!-- JS inyectará el Sign In móvil aquí si no hay usuario -->
+            </nav>
+        </div>
+    </div>
+</header>
 
     <script src="../vendor/bootstrap.bundle.min.js"></script>
+ 
 </body>
 
 </html>
