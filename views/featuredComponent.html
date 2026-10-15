@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Featured Collection</title>
+    
+    <!-- Archivos Locales en Vendor -->
+    <link href="../vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../vendor/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- CSS de Features -->
+    <link rel="stylesheet" href="../css/features.css">
+</head>
+<body>
+
+    <section class="py-5 features-section">
+        <div class="container py-4">
+            
+            <!-- Header Section -->
+            <div class="d-flex align-items-end justify-content-between mb-5">
+                <div>
+                    <h2 class="font-heading fw-bold text-dark-custom mb-3" style="font-size: 2.5rem;">
+                        Featured Collection
+                    </h2>
+                    <p class="fs-5 text-muted-custom mb-0">
+                        Handpicked essentials for the discerning scholar
+                    </p>
+                </div>
+                
+                <!-- Desktop View All Link -->
+                <a href="/products" class="d-none d-md-inline-flex align-items-center text-dark-custom text-decoration-none fw-medium link-hover-gap">
+                    View All <i class="fa-solid fa-arrow-right fs-6"></i>
+                </a>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="row g-4">
+                
+                <!-- Product Card 1 -->
+                <div class="col-12 col-sm-6 col-lg-3 animate-slide-up">
+                    <div class="product-card">
+                        <a href="#" class="text-decoration-none d-block">
+                            <div class="product-img-wrapper">
+                                <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?w=500" alt="Cashmere Beanie">
+                            </div>
+                        </a>
+                        <div class="product-info">
+                            <div>
+                                <h3 class="font-heading product-title">Cashmere Beanie</h3>
+                                <p class="product-price">$90.00</p>
+                            </div>
+                            <button class="cart-btn" aria-label="Add to cart">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 2 -->
+                <div class="col-12 col-sm-6 col-lg-3 animate-slide-up" style="animation-delay: 100ms;">
+                    <div class="product-card">
+                        <a href="#" class="text-decoration-none d-block">
+                            <div class="product-img-wrapper">
+                                <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500" alt="Quilted Jacket">
+                            </div>
+                        </a>
+                        <div class="product-info">
+                            <div>
+                                <h3 class="font-heading product-title">Quilted Jacket</h3>
+                                <p class="product-price">$280.00</p>
+                            </div>
+                            <button class="cart-btn" aria-label="Add to cart">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 3 -->
+                <div class="col-12 col-sm-6 col-lg-3 animate-slide-up" style="animation-delay: 200ms;">
+                    <div class="product-card">
+                        <a href="#" class="text-decoration-none d-block">
+                            <div class="product-img-wrapper">
+                                <img src="https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=500" alt="Oxford Notebook">
+                            </div>
+                        </a>
+                        <div class="product-info">
+                            <div>
+                                <h3 class="font-heading product-title">Oxford Notebook</h3>
+                                <p class="product-price">$28.00</p>
+                            </div>
+                            <button class="cart-btn" aria-label="Add to cart">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Card 4 -->
+                <div class="col-12 col-sm-6 col-lg-3 animate-slide-up" style="animation-delay: 300ms;">
+                    <div class="product-card">
+                        <a href="#" class="text-decoration-none d-block">
+                            <div class="product-img-wrapper">
+                                <img src="https://images.unsplash.com/photo-1579762593175-20226054cad0?w=500" alt="Classic Fountain Pen">
+                            </div>
+                        </a>
+                        <div class="product-info">
+                            <div>
+                                <h3 class="font-heading product-title">Classic Fountain Pen</h3>
+                                <p class="product-price">$85.00</p>
+                            </div>
+                            <button class="cart-btn" aria-label="Add to cart">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Mobile View All Link -->
+            <div class="text-center mt-5 d-block d-md-none">
+                <a href="/products" class="d-inline-flex align-items-center text-dark-custom text-decoration-none fw-medium link-hover-gap">
+                    View All Products <i class="fa-solid fa-arrow-right fs-6"></i>
+                </a>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- JS de Bootstrap -->
+    <script src="vendor/bootstrap.bundle.min.js"></script>
+</body>
+</html>

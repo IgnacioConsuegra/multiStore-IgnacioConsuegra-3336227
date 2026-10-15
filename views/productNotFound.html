@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Not Found</title>
+    
+    <!-- Archivos Locales en Vendor -->
+    <link href="../vendor/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-color: #F4F1EA;
+            --btn-color: #3f523e;
+            --text-dark: #1a1a1a;
+            --paper: #ffffff;
+        }
+
+        body {
+            font-family: 'PT Serif', serif;
+            background-color: var(--bg-color);
+            margin: 0;
+        }
+
+        .not-found-page {
+            min-height: 100vh;
+            background-color: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .font-heading {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .btn-custom {
+            background-color: var(--btn-color);
+            color: var(--paper);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 2px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+            display: inline-block;
+        }
+
+        .btn-custom:hover {
+            background-color: #2c3a2b;
+            color: var(--paper);
+        }
+    </style>
+</head>
+<body>
+
+    <main class="not-found-page">
+        <div class="text-center">
+            <h2 class="font-heading fs-2 fw-bold mb-4" style="color: var(--text-dark);">
+                Product not found
+            </h2>
+            <a href="/views/collections.html" class="btn-custom">
+                Back to Shop
+            </a>
+        </div>
+    </main>
+
+</body>
+</html>

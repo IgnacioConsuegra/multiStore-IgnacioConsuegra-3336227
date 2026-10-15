@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details - Cashmere Beanie</title>
+
+    <!-- Archivos Locales en Vendor -->
+    <link href="../vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../vendor/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <!-- CSS de Producto -->
+    <link rel="stylesheet" href="../css/productDetails.css">
+</head>
+
+<body>
+
+    <main class="product-page py-5">
+        <div class="container py-4">
+
+            <!-- Back Button -->
+            <a href="/views/collections.html"
+                class="back-link d-inline-flex align-items-center gap-2 mb-5 text-decoration-none">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Back to Shop</span>
+            </a>
+
+            <div class="row g-5">
+
+                <!-- Product Image -->
+                <div class="col-12 col-lg-6">
+                    <div class="product-image-container border custom-border-light rounded-1 overflow-hidden bg-white">
+                        <!-- ID añadido: prod-img -->
+                        <img id="prod-img" src="" alt="" class="w-100 h-100 object-fit-cover">
+                    </div>
+                </div>
+
+                <!-- Product Info -->
+                <div class="col-12 col-lg-6">
+                    <div class="d-flex flex-column gap-4">
+
+                        <!-- Header -->
+                        <div>
+                            <!-- ID añadido: prod-name -->
+                            <h1 id="prod-name" class="font-heading fw-bold text-dark-custom mb-3 display-5"></h1>
+                            <!-- ID añadido: prod-price -->
+                            <p id="prod-price" class="font-heading fw-bold text-dark-custom display-6 mb-0"></p>
+                        </div>
+
+                        <!-- Description Divider -->
+                        <div class="border-top custom-border-light pt-4">
+                            <!-- ID añadido: prod-desc -->
+                            <p id="prod-desc" class="text-muted-custom fs-6 mb-0"></p>
+                        </div>
+
+                        <!-- Properties (Contenedor dinámico) -->
+                        <div id="prod-properties" class="properties-section d-flex flex-column gap-4 mt-2">
+                        </div>
+
+
+                        <!-- Quantity -->
+                        <div class="mt-2">
+                            <h3 class="property-label text-capitalize fw-bold mb-3 fs-6">Quantity</h3>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="quantity-selector d-flex align-items-center">
+                                    <button class="qty-btn" id="btn-minus" aria-label="Decrease quantity">
+                                        <i class="fa-solid fa-minus fs-7"></i>
+                                    </button>
+                                    <span class="qty-display fw-medium" id="qty-value">1</span>
+                                    <button class="qty-btn" id="btn-plus" aria-label="Increase quantity">
+                                        <i class="fa-solid fa-plus fs-7"></i>
+                                    </button>
+                                </div>
+                                <!-- ID añadido: prod-stock -->
+                                <span id="prod-stock" class="text-muted-custom small"></span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3 mt-2">
+                            <!-- Añadida la clase identificadora btn-add-cart a nivel de JS -->
+                            <button
+                                class="btn btn-add-cart flex-grow-1 d-flex justify-content-center align-items-center gap-2">
+                                <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                            </button>
+                            <button class="btn btn-wishlist d-flex justify-content-center align-items-center"
+                                aria-label="Add to wishlist">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                        </div>
+
+                        <!-- Success Message -->
+                        <div id="success-msg" class="success-message d-none mt-2">
+                            <i class="fa-solid fa-check me-2"></i> Added to cart successfully!
+                        </div>
+
+                        <!-- Features -->
+                        <div class="row g-4 pt-4 mt-2 border-top custom-border-light">
+                            <div class="col-6 d-flex align-items-center gap-3">
+                                <div
+                                    class="feature-icon-wrapper rounded-circle d-flex justify-content-center align-items-center">
+                                    <i class="fa-solid fa-truck"></i>
+                                </div>
+                                <div>
+                                    <p class="fw-medium text-dark-custom mb-0 fs-6">Free Shipping</p>
+                                    <p class="text-muted-custom small mb-0">Orders over $200</p>
+                                </div>
+                            </div>
+                            <div class="col-6 d-flex align-items-center gap-3">
+                                <div
+                                    class="feature-icon-wrapper rounded-circle d-flex justify-content-center align-items-center">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                </div>
+                                <div>
+                                    <p class="fw-medium text-dark-custom mb-0 fs-6">Secure Payment</p>
+                                    <p class="text-muted-custom small mb-0">100% protected</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- JS de Bootstrap -->
+    <script src="../vendor/bootstrap.bundle.min.js"></script>
+    <script src="../js/product.js"></script>
+</body>
+
+</html>

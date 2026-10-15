@@ -1,0 +1,217 @@
+:root {
+    --bg-color: #F4F1EA;
+    --btn-color: #3f523e;
+    --input-bg: #ffffff;
+    --text-dark: #1a1a1a;
+    --paper: #ffffff;
+    --academia: #2C2420;
+    --gold: #B8860B;
+    --blue: #007CBE;
+}
+
+body {
+    font-family: 'PT Serif', serif;
+    background-color: var(--bg-color);
+}
+
+.font-heading {
+    font-family: 'Playfair Display', serif;
+}
+
+.collection-section {
+    background-color: var(--bg-color);
+}
+
+.text-dark-custom {
+    color: var(--text-dark);
+}
+
+.text-muted-custom {
+    color: #6c757d;
+}
+
+.custom-border-light {
+    border-color: #e5e5e5 !important;
+}
+
+/* --- Search Bar --- */
+.search-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+    font-size: 1.1rem;
+}
+
+.custom-search-input {
+    background-color: var(--input-bg);
+    border: 1px solid #e5e5e5;
+    border-radius: 2px;
+    padding: 1rem 1rem 1rem 3rem;
+    color: var(--text-dark);
+    font-family: 'PT Serif', serif;
+    transition: border-color 0.2s ease;
+}
+
+.custom-search-input:focus {
+    outline: none;
+    border-color: var(--btn-color);
+}
+
+/* --- Filters & Sort Controls --- */
+.filter-toggle-btn {
+    background-color: var(--input-bg);
+    border: 1px solid #e5e5e5;
+    border-radius: 2px;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-dark);
+    font-family: 'PT Serif', serif;
+    transition: all 0.2s ease;
+}
+
+.filter-toggle-btn:hover, .filter-toggle-btn[aria-expanded="true"] {
+    border-color: var(--btn-color);
+}
+
+.custom-sort-select {
+    background-color: var(--input-bg);
+    border: 1px solid #e5e5e5;
+    border-radius: 2px;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-dark);
+    font-family: 'PT Serif', serif;
+    cursor: pointer;
+}
+
+.custom-sort-select:focus {
+    outline: none;
+    border-color: var(--btn-color);
+}
+
+/* --- Filters Panel --- */
+.filters-panel-body {
+    background-color: var(--input-bg);
+    border: 1px solid #e5e5e5;
+    border-radius: 2px;
+    padding: 2rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Checkboxes */
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: #6c757d;
+    font-size: 0.9rem;
+    transition: color 0.2s ease;
+}
+
+.custom-checkbox:hover {
+    color: var(--text-dark);
+}
+
+.custom-checkbox input[type="checkbox"] {
+    cursor: pointer;
+    accent-color: var(--btn-color);
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Price Inputs */
+.custom-price-input {
+    width: 80px;
+    padding: 0.5rem;
+    border: 1px solid #e5e5e5;
+    border-radius: 2px;
+    background-color: var(--input-bg);
+    font-family: 'PT Serif', serif;
+}
+
+.custom-price-input:focus {
+    outline: none;
+    border-color: var(--btn-color);
+}
+
+/* --- Product Cards (Recicladas) --- */
+.product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background-color: var(--paper);
+    transition: box-shadow 0.3s ease;
+    border-radius: 2px;
+}
+
+.product-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.product-img-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4/5;
+    overflow: hidden;
+    background-color: #e5e5e5;
+}
+
+.product-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-img-wrapper img {
+    transform: scale(1.03); 
+}
+
+.product-info {
+    padding: 1.25rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    background-color: var(--paper);
+}
+
+.product-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 0.5rem;
+}
+
+.product-price {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--text-dark);
+    font-weight: 700;
+    margin: 0;
+}
+
+.cart-btn {
+    background-color: #f7f7f7;
+    color: #999;
+    border: 1px solid #eee;
+    border-radius: 2px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.cart-btn:hover {
+    background-color: var(--btn-color);
+    border-color: var(--btn-color);
+    color: var(--paper);
+}

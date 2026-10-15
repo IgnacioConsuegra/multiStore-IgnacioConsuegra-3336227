@@ -1,0 +1,50 @@
+[
+  {
+    "id": "1",
+    "name": "Cashmere Beanie",
+    "price": 90.00,
+    "image": "https://images.unsplash.com/photo-1544816155-12df9643f363?w=500",
+    "description": "Luxurious cashmere knit beanie, perfect for the modern scholar.",
+    "category": "Accessories",
+    "stock": 15,
+    "sizes": ["S", "L", "XL"],
+    "colors": ["Black", "Orange", "Green"],
+    "materials": ["Cashmere", "Wool"]
+  },
+  {
+    "id": "2",
+    "name": "Quilted Jacket",
+    "price": 280.00,
+    "image": "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500",
+    "description": "Timeless quilted leather jacket with premium stitching.",
+    "category": "Outerwear",
+    "stock": 5,
+    "sizes": ["M", "L", "XL"],
+    "colors": ["Black", "Brown"],
+    "materials": ["Leather", "Polyester"]
+  },
+  {
+    "id": "3",
+    "name": "Oxford Notebook",
+    "price": 28.00,
+    "image": "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=500",
+    "description": "Hardcover notebook with acid-free paper for lasting thoughts.",
+    "category": "Stationery",
+    "stock": 42,
+    "sizes": ["A5", "A4"],
+    "colors": ["Black"],
+    "materials": ["Paper", "Leather"]
+  },
+  {
+    "id": "4",
+    "name": "Classic Fountain Pen",
+    "price": 85.00,
+    "image": "https://images.unsplash.com/photo-1579762593175-20226054cad0?w=500",
+    "description": "Elegant fountain pen with a smooth iridium nib.",
+    "category": "Stationery",
+    "stock": 0,
+    "sizes": ["Standard"],
+    "colors": ["Black", "Gold"],
+    "materials": ["Metal", "Resin"]
+  }
+]
