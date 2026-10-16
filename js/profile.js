@@ -1,13 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // 1. Verificación de Autenticación
     let user = JSON.parse(localStorage.getItem('user'));
     if (!user) {
         window.location.href = 'login.html';
         return;
     }
 
-    // 2. Manejo de Pestañas
     const tabProfile = document.getElementById('tab-profile');
     const tabOrders = document.getElementById('tab-orders');
     const secProfile = document.getElementById('section-profile');
@@ -28,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderOrders();
     });
 
-    // 3. Lógica de Perfil (Visualización y Edición)
     const formInputs = document.querySelectorAll('#profile-form input');
     const btnEdit = document.getElementById('btn-edit-profile');
     const viewActions = document.getElementById('profile-actions-view');
@@ -54,7 +51,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function toggleEditMode(enable) {
         formInputs.forEach(input => {
-            // Prevenir la edición del email por seguridad (opcional, ajustado al React original)
             if (input.id === 'prof-email') return; 
             input.disabled = !enable;
         });
@@ -75,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnCancel.addEventListener('click', (e) => {
         e.preventDefault();
-        loadUserData(); // Restaurar datos originales
+        loadUserData(); 
         toggleEditMode(false);
     });
 
@@ -125,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderOrders() {
         const allOrders = JSON.parse(localStorage.getItem('orders')) || [];
-        // Filtrar órdenes que pertenezcan a este usuario mediante su email o id
         const userOrders = allOrders.filter(o => o.user && o.user.email === user.email);
         
         const container = document.getElementById('orders-container');
@@ -140,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         emptyState.classList.add('d-none');
 
-        // Ordenar de más reciente a más antigua
         userOrders.reverse().forEach(order => {
             const itemsHtml = order.items.map(item => `
                 <div class="d-flex align-items-center gap-3">
@@ -156,10 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `).join('');
 
-            // Asegurar lectura segura de los totales guardados
             const total = order.totals ? order.totals.total : order.items.reduce((acc, it) => acc + (it.price * it.quantity), 0);
             
-            // Formatear Fecha
             const dateObj = new Date(order.date);
             const dateString = isNaN(dateObj) ? order.date : dateObj.toLocaleDateString('en-US', {
                 year: 'numeric', month: 'long', day: 'numeric'

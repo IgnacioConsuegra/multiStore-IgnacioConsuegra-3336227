@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const products = JSON.parse(localStorage.getItem('currentProducts')) || [];
     const orders = JSON.parse(localStorage.getItem('orders')) || [];
 
-    // 1. Calculate Stats
     let totalRevenue = 0;
     let totalOrders = orders.length;
     let totalProducts = products.length;
@@ -15,20 +14,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
 
-    // Update DOM Stats
     document.getElementById('stat-revenue').textContent = `$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     document.getElementById('stat-orders').textContent = totalOrders;
     document.getElementById('stat-products').textContent = totalProducts;
     document.getElementById('stat-aov').textContent = `$${avgOrderValue.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
 
-    // 2. Process Data for Charts
     const monthlyData = {};
     const categoryData = {};
 
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
     orders.forEach(order => {
-        // Group by Month
         const dateObj = new Date(order.date);
         const month = monthNames[dateObj.getMonth()];
         
@@ -38,7 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
         monthlyData[month].sales += order.totals.total || 0;
         monthlyData[month].orders += 1;
 
-        // Group by Category
         if (order.items) {
             order.items.forEach(item => {
                 const cat = item.category || 'Uncategorized';
@@ -48,7 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Ensure months order chronologically (simple approach for existing data)
     const sortedMonths = Object.keys(monthlyData).sort((a, b) => monthNames.indexOf(a) - monthNames.indexOf(b));
     
     const chartLabels = sortedMonths;
@@ -58,11 +52,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const categoryLabels = Object.keys(categoryData);
     const categoryValues = Object.values(categoryData);
 
-    // Chart.js Global Defaults matching Academia aesthetic
     Chart.defaults.font.family = "'PT Serif', serif";
     Chart.defaults.color = '#6c757d';
 
-    // 3. Line Chart: Sales Trend
     const ctxSales = document.getElementById('salesTrendChart').getContext('2d');
     new Chart(ctxSales, {
         type: 'line',
@@ -91,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 4. Bar Chart: Orders by Month
     const ctxOrders = document.getElementById('ordersMonthChart').getContext('2d');
     new Chart(ctxOrders, {
         type: 'bar',
@@ -115,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 5. Pie Chart: Sales by Category
     const pieColors = ['#A88844', '#3f523e', '#8B8C7A', '#D4AF37', '#2C2420'];
     const ctxCategory = document.getElementById('categoryPieChart').getContext('2d');
     new Chart(ctxCategory, {
@@ -138,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 6. Low Stock Alert List
     const lowStockContainer = document.getElementById('low-stock-container');
     const lowStockProducts = products.filter(p => p.stock < 10);
 

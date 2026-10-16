@@ -1,10 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Variables globales
     let allProducts = [];
     let filtrado = [];
 
-    // Elementos del DOM
     const grid = document.getElementById('products-grid');
     const itemCount = document.getElementById('item-count');
     const searchInput = document.getElementById('search-input');
@@ -12,13 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const priceMin = document.getElementById('price-min');
     const priceMax = document.getElementById('price-max');
     
-    // Checkboxes de filtros
     const categoryChecks = document.querySelectorAll('.category-check');
     const sizeChecks = document.querySelectorAll('.size-check');
     const colorChecks = document.querySelectorAll('.color-check');
     const materialChecks = document.querySelectorAll('.material-check');
 
-    // 1. Cargar datos (Priorizando el localStorage para respetar cambios de stock/admin)
     function loadData() {
         const localDB = JSON.parse(localStorage.getItem('currentProducts'));
         
@@ -37,11 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. Lógica Principal de Filtrado
     function applyFilters() {
-        filtrado = [...allProducts]; // Copia fresca del array original
+        filtrado = [...allProducts]; 
 
-        // A. Filtro por Búsqueda (Nombre, Descripción, Categoría)
         const searchTerm = searchInput.value.toLowerCase().trim();
         if (searchTerm) {
             filtrado = filtrado.filter(p => 
@@ -51,7 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
             );
         }
 
-        // B. Filtros por Checkboxes (Arrays de valores seleccionados)
         const getCheckedValues = (nodeList) => Array.from(nodeList).filter(cb => cb.checked).map(cb => cb.value);
         
         const activeCategories = getCheckedValues(categoryChecks);
@@ -59,32 +52,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const activeColors = getCheckedValues(colorChecks);
         const activeMaterials = getCheckedValues(materialChecks);
 
-        // Aplicar Categorías
         if (activeCategories.length > 0) {
             filtrado = filtrado.filter(p => activeCategories.includes(p.category));
         }
 
-        // Aplicar Tallas (El producto debe tener al menos una de las tallas seleccionadas)
         if (activeSizes.length > 0) {
             filtrado = filtrado.filter(p => p.sizes && p.sizes.some(size => activeSizes.includes(size)));
         }
 
-        // Aplicar Colores
         if (activeColors.length > 0) {
             filtrado = filtrado.filter(p => p.colors && p.colors.some(color => activeColors.includes(color)));
         }
 
-        // Aplicar Materiales
         if (activeMaterials.length > 0) {
             filtrado = filtrado.filter(p => p.materials && p.materials.some(material => activeMaterials.includes(material)));
         }
 
-        // C. Filtro por Precio
         const minP = parseFloat(priceMin.value) || 0;
         const maxP = parseFloat(priceMax.value) || Infinity;
         filtrado = filtrado.filter(p => p.price >= minP && p.price <= maxP);
 
-        // D. Ordenamiento (Sort)
         const sortValue = sortSelect.value;
         if (sortValue === 'price-low') {
             filtrado.sort((a, b) => a.price - b.price);
@@ -96,11 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
             filtrado.sort((a, b) => (b.rating || 0) - (a.rating || 0));
         }
 
-        // E. Renderizar Resultados
         renderProducts(filtrado);
     }
 
-    // 3. Renderizar las tarjetas
     function renderProducts(productsToRender) {
         grid.innerHTML = '';
         itemCount.textContent = productsToRender.length;
@@ -117,10 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         productsToRender.forEach((product, index) => {
-            // Se añade un pequeño retraso de animación en cascada
             const delay = (index % 12) * 50; 
             
-            // Etiqueta condicional de stock
             const stockBadge = product.stock <= 0 
                 ? `<span class="position-absolute top-0 start-0 m-3 badge bg-danger rounded-1">Out of Stock</span>`
                 : '';
@@ -155,7 +138,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. Asignar Event Listeners a los controles
     searchInput.addEventListener('input', applyFilters);
     sortSelect.addEventListener('change', applyFilters);
     priceMin.addEventListener('input', applyFilters);

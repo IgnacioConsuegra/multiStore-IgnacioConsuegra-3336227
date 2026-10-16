@@ -1,25 +1,22 @@
 function initNavBar() {
-    // 1. Elementos del DOM
     const userActionsContainer = document.getElementById('user-actions-container');
     const mobileNavContainer = document.getElementById('mobile-nav-container');
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
     const mobileMenuIcon = document.getElementById('mobile-menu-icon');
 
-    // 2. Comprobar Usuario en LocalStorage de forma segura
     let userData = null;
     try {
         userData = JSON.parse(localStorage.getItem('user'));
     } catch (e) {
         console.error("Error leyendo el usuario del localStorage", e);
     }
-    
+
     if (userData && !userData.role) {
         userData.role = "Admin";
         localStorage.setItem('user', JSON.stringify(userData));
     }
 
-    // 3. Renderizar Menú de Usuario o Botones de Autenticación
     if (userData && userActionsContainer) {
         const isAdmin = userData.role && userData.role.toLowerCase() === 'admin';
         const adminLinkHTML = isAdmin ? `<a href="/views/admin.html" class="dropdown-item-custom" style="color: var(--accent);">Admin Dashboard</a>` : '';
@@ -47,13 +44,12 @@ function initNavBar() {
             </div>
         `;
 
-        // Asignar el evento de logout después de inyectar el HTML
         setTimeout(() => {
             const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', () => {
                     localStorage.removeItem('user');
-                    window.location.reload(); 
+                    window.location.reload();
                 });
             }
         }, 0);
@@ -75,24 +71,61 @@ function initNavBar() {
         }
     }
 
-    // 4. Lógica del Menú Móvil (Toggle)
     if (mobileMenuBtn && mobileMenu && mobileMenuIcon) {
         let isMenuOpen = false;
 
         mobileMenuBtn.addEventListener('click', () => {
             isMenuOpen = !isMenuOpen;
-            
+
             if (isMenuOpen) {
                 mobileMenu.classList.remove('d-none');
-                mobileMenu.style.display = 'block'; 
+                mobileMenu.style.display = 'block';
                 mobileMenuIcon.classList.remove('fa-bars');
                 mobileMenuIcon.classList.add('fa-xmark');
             } else {
                 mobileMenu.classList.add('d-none');
-                mobileMenu.style.display = 'none'; 
+                mobileMenu.style.display = 'none';
                 mobileMenuIcon.classList.remove('fa-xmark');
                 mobileMenuIcon.classList.add('fa-bars');
             }
         });
+
+
+
+
     }
+
+
+
+    setActiveNavLink();
+}
+function setActiveNavLink() {
+    const currentPath = window.location.pathname.toLowerCase();
+
+    const navLinks = document.querySelectorAll('.desktop-nav a, #mobile-nav-container a');
+
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href').toLowerCase();
+
+        const isHome = currentPath === '/' || currentPath.endsWith('index.html');
+        const isCurrentMatch = (isHome && href === '/') || (!isHome && href !== '/' && currentPath.includes(href));
+
+        if (isCurrentMatch) {
+            link.classList.add('text-dark-custom', 'active');
+            link.classList.remove('text-muted-custom');
+
+            if (link.closest('#mobile-nav-container')) {
+                link.classList.add('fw-bold');
+                link.classList.remove('fw-medium');
+            }
+        } else {
+            link.classList.add('text-muted-custom');
+            link.classList.remove('text-dark-custom', 'active');
+
+            if (link.closest('#mobile-nav-container')) {
+                link.classList.add('fw-medium');
+                link.classList.remove('fw-bold');
+            }
+        }
+    });
 }

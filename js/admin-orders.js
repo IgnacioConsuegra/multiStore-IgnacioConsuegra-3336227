@@ -1,9 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Verificación de Autenticación (Opcional, asumiendo que tienes un control de roles global)
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user || user.role !== 'Admin') {
-        window.location.href = '../index.html'; // Redirigir si no es admin
+        window.location.href = '../index.html'; 
         return;
     }
 
@@ -36,11 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderOrders() {
-        // 1. Actualizar Estadísticas
         const pendingCount = orders.filter(o => o.status === 'Pending').length;
         const processingCount = orders.filter(o => o.status === 'Processing').length;
         
-        // Sumar ingresos solo de órdenes completadas (Delivered)
         const revenue = orders
             .filter(o => o.status === 'Delivered')
             .reduce((acc, order) => acc + (order.totals ? order.totals.total : 0), 0);
@@ -50,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('stat-processing-orders').textContent = processingCount;
         document.getElementById('stat-revenue').textContent = `$${revenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
-        // 2. Renderizar Tabla
         tbody.innerHTML = '';
 
         if (orders.length === 0) {
@@ -60,10 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         emptyState.classList.add('d-none');
 
-        // Renderizar de más reciente a más antigua
         [...orders].reverse().forEach(order => {
             
-            // Lógica para mostrar los productos de la orden
             const firstItem = order.items && order.items.length > 0 ? order.items[0] : null;
             let productHtml = `<span class="text-muted-custom small">No items</span>`;
             
@@ -126,17 +120,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Función global para actualizar el estado
     window.updateOrderStatus = function(orderId, newStatus) {
         const orderIndex = orders.findIndex(o => o.orderId === orderId);
         
         if (orderIndex > -1) {
             orders[orderIndex].status = newStatus;
             localStorage.setItem('orders', JSON.stringify(orders));
-            renderOrders(); // Re-renderizar para actualizar badges y estadísticas
+            renderOrders(); 
         }
     };
 
-    // Renderizado inicial
     renderOrders();
 });

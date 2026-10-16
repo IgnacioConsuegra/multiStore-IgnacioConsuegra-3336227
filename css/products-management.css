@@ -19,7 +19,6 @@ body {
 .text-muted-custom { color: #6c757d; }
 .custom-border-light { border-color: var(--border-color) !important; }
 
-/* Botones */
 .btn-custom {
     background-color: var(--btn-color);
     color: var(--paper);
@@ -56,7 +55,6 @@ body {
 .btn-action.delete { color: #dc3545; }
 .btn-action.delete:hover { background-color: rgba(220, 53, 69, 0.1); }
 
-/* Form Inputs */
 .simple-input {
     background-color: var(--paper);
     border: 1px solid rgba(44, 36, 32, 0.2);
@@ -74,7 +72,6 @@ body {
     box-shadow: 0 0 0 0.2rem rgba(63, 82, 62, 0.1);
 }
 
-/* Tabla */
 .custom-table th { border-bottom-width: 1px; }
 .custom-table td { border-bottom: 1px solid var(--border-color); }
 .custom-table tr:hover td { background-color: rgba(44, 36, 32, 0.02); }
@@ -87,7 +84,6 @@ body {
     background-color: var(--bg-color);
 }
 
-/* Badges de Stock */
 .stock-badge {
     padding: 0.25rem 0.5rem;
     border-radius: 4px;
@@ -99,7 +95,6 @@ body {
 .stock-low { background-color: #fef3c7; color: #92400e; }
 .stock-good { background-color: #d1fae5; color: #065f46; }
 
-/* Animaciones */
 .animate-slide-down {
     animation: slideDown 0.3s ease-out forwards;
 }

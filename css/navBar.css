@@ -6,10 +6,9 @@
     --paper: #ffffff;
     --academia: #2C2420;
     --border-color: #e5e5e5;
-    --accent: #B8860B; /* Ajusta según el color "accent" de tu badge */
+    --accent: #B8860B; 
 }
 
-/* Base NavBar */
 .navbar-custom {
     background-color: var(--bg-color);
     backdrop-filter: blur(8px);
@@ -27,7 +26,6 @@
 .text-muted-custom { color: #6c757d; }
 .custom-border-light { border-color: rgba(44, 36, 32, 0.1) !important; }
 
-/* Logo Animation */
 .logo-icon {
     width: 40px;
     height: 40px;
@@ -38,7 +36,6 @@
     transform: scale(1.05);
 }
 
-/* Desktop Navigation Links */
 .nav-link-custom {
     font-size: 0.875rem;
     font-weight: 500;
@@ -71,7 +68,6 @@
     transform: scaleX(1);
 }
 
-/* Action Buttons */
 .action-btn {
     padding: 0.5rem;
     transition: color 0.2s ease;
@@ -80,7 +76,6 @@
     color: var(--text-dark) !important;
 }
 
-/* --- User Dropdown --- */
 .user-group {
     position: relative;
 }
@@ -123,7 +118,7 @@
 }
 
 .dropdown-item-custom:hover {
-    background-color: rgba(63, 82, 62, 0.05); /* --btn-color with low opacity */
+    background-color: rgba(63, 82, 62, 0.05); 
 }
 
 .btn-signin {

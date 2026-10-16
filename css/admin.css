@@ -19,7 +19,6 @@ body {
 .bg-primary-light { background-color: var(--primary-light); }
 .text-accent { color: var(--accent); }
 
-/* Cards */
 .stat-card, .chart-card {
     background-color: var(--paper);
     border: 1px solid var(--border-color);
@@ -50,7 +49,6 @@ body {
     margin-bottom: 0;
 }
 
-/* Charts Containers */
 .chart-container {
     position: relative;
     height: 300px;
@@ -64,7 +62,6 @@ body {
     max-width: 500px;
 }
 
-/* Low Stock Item */
 .stock-item {
     background-color: var(--bg-color);
     border-radius: 4px;

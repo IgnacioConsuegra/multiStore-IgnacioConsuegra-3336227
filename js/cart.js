@@ -8,12 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     const user = JSON.parse(localStorage.getItem('user')) || null;
 
-    // 1. Configurar estado del botón Checkout
     if (!user) {
         checkoutBtn.textContent = 'Sign In to Checkout';
     }
 
-    // Sincronizar el carrito con el stock más reciente en currentProducts
     function syncCartWithCurrentProducts() {
         let localProducts = JSON.parse(localStorage.getItem('currentProducts')) || [];
         if (localProducts.length > 0 && cart.length > 0) {
@@ -32,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. Función principal de renderizado
     function renderCart() {
         syncCartWithCurrentProducts();
 
@@ -101,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
 
-        // Actualizar Resumen
         const shipping = subtotal >= 200 ? 0 : 15.00;
         const total = subtotal + shipping;
 
@@ -109,7 +105,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('summary-shipping').textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
         document.getElementById('summary-total').textContent = `$${total.toFixed(2)}`;
 
-        // Guardamos los totales globalmente para poder usarlos al guardar la orden
         window.currentOrderTotals = { subtotal, shipping, total };
 
         const shippingNotice = document.getElementById('shipping-notice');
@@ -121,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. Funciones Globales para manipular el carrito
     window.removeFromCart = function(index) {
         cart.splice(index, 1);
         localStorage.setItem('cart', JSON.stringify(cart));
@@ -140,7 +134,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Función para inyectar y mostrar el modal de éxito central
     function showSuccessOverlay() {
         const overlay = document.createElement('div');
         overlay.id = "success-overlay";
@@ -169,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
         
         document.body.appendChild(overlay);
 
-        // Cuenta regresiva
         let timeLeft = 5;
         const countdownSpan = document.getElementById('redirect-countdown');
         const interval = setInterval(() => {
@@ -179,7 +171,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 1000);
     }
 
-    // 4. Lógica de Procesamiento de la Orden
     checkoutBtn.addEventListener('click', async () => {
         if (!user) {
             window.location.href = 'login.html';
@@ -190,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
         checkoutBtn.textContent = 'Processing Order...';
 
         try {
-            // A) Leer la DB desde currentProducts y descontar stock
             let localDB = JSON.parse(localStorage.getItem('currentProducts'));
             if (!localDB) {
                 const response = await fetch('products.json');
@@ -206,19 +196,15 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             localStorage.setItem('currentProducts', JSON.stringify(localDB));
 
-            // B) Crear el registro de la orden
-// Extraer la hora local del sistema y formatearla
             const now = new Date();
-            const month = now.getMonth() + 1; // En JavaScript los meses van de 0 a 11
+            const month = now.getMonth() + 1; 
             const day = now.getDate();
             const year = now.getFullYear();
             const hours = now.getHours().toString().padStart(2, '0');
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const formattedDate = `${month}/${day}/${year} ${hours}:${minutes}`;
 
-            // Crear el registro de la orden
             const newOrder = {
-                // Date.now() garantiza una marca de tiempo única en milisegundos
                 orderId: 'ORD-' + Date.now() + '-' + Math.floor(Math.random() * 1000), 
                 date: formattedDate,
                 user: {
@@ -231,23 +217,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 status: 'Pending'
             };
 
-            // Guardar en el arreglo de orders
             let orders = JSON.parse(localStorage.getItem('orders')) || [];
             orders.push(newOrder);
             localStorage.setItem('orders', JSON.stringify(orders));
 
-            // C) Simular un corto tiempo de procesamiento de red
             setTimeout(() => {
-                // Limpiar el carrito local
                 localStorage.removeItem('cart');
                 cart = [];
                 
-                if(typeof initNavBar === 'function') initNavBar(); // Resetea badge navBar
+                if(typeof initNavBar === 'function') initNavBar(); 
 
-                // Mostrar el modal centrado
                 showSuccessOverlay();
                 
-                // Redirigir a la página de perfil tras 5 segundos
                 setTimeout(() => {
                     window.location.href = 'profile.html';
                 }, 5000);
@@ -262,6 +243,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Iniciar renderizado
     renderCart();
 });

@@ -38,7 +38,6 @@ body {
     font-size: 0.8rem;
 }
 
-/* --- Back Link --- */
 .back-link {
     color: #6c757d;
     transition: color 0.2s ease;
@@ -48,12 +47,10 @@ body {
     color: var(--text-dark);
 }
 
-/* --- Product Image --- */
 .product-image-container {
     aspect-ratio: 1 / 1;
 }
 
-/* --- Properties (Sizes, Colors) --- */
 .property-label {
     font-family: 'Playfair Display', serif;
     font-size: 0.8rem;
@@ -85,7 +82,6 @@ body {
     color: var(--paper);
 }
 
-/* --- Quantity Selector --- */
 .quantity-selector {
     border: 1px solid #e5e5e5;
     background-color: var(--paper);
@@ -113,7 +109,6 @@ body {
     color: var(--text-dark);
 }
 
-/* --- Action Buttons --- */
 .btn-add-cart {
     background-color: var(--btn-color);
     color: var(--paper);
@@ -144,7 +139,6 @@ body {
     background-color: #f8f9fa;
 }
 
-/* --- Success Message --- */
 .success-message {
     background-color: #e8f5e9;
     border: 1px solid #c8e6c9;
@@ -160,7 +154,6 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* --- Features Section --- */
 .feature-icon-wrapper {
     width: 40px;
     height: 40px;

@@ -21,13 +21,11 @@ body {
     font-family: 'Playfair Display', serif;
 }
 
-/* Colores personalizados */
 .text-dark-custom { color: var(--text-dark); }
 .text-muted-custom { color: #6c757d; }
 .text-primary-custom { color: var(--btn-color); }
 .text-primary-custom:hover { color: #2c3a2b; }
 
-/* Wrapper y Contenedor */
 .auth-wrapper {
     flex-grow: 1;
     display: flex;
@@ -40,10 +38,9 @@ body {
 
 .signup-container {
     width: 100%;
-    max-width: 440px; /* Un poco más ancho que el login para que entren bien los inputs lado a lado */
+    max-width: 440px; 
 }
 
-/* Icono Superior */
 .icon-placeholder {
     width: 64px;
     height: 64px;
@@ -51,12 +48,11 @@ body {
     border-radius: 4px;
 }
 
-/* Inputs con Iconos (Name, Email, Password, etc) */
 .custom-input-group .form-control {
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
     border-radius: 2px;
-    padding: 0.75rem 1rem 0.75rem 2.75rem; /* Espacio extra a la izquierda para el icono */
+    padding: 0.75rem 1rem 0.75rem 2.75rem; 
     font-family: 'PT Serif', serif;
     font-size: 0.9rem;
     color: var(--text-dark);
@@ -73,7 +69,6 @@ body {
     color: #999;
 }
 
-/* Inputs Simples sin icono (City, State, Zip, Country) */
 .simple-input {
     background-color: var(--input-bg);
     border: 1px solid var(--border-color);
@@ -91,7 +86,6 @@ body {
     outline: none;
 }
 
-/* Custom Checkbox */
 .custom-checkbox {
     width: 1rem;
     height: 1rem;
@@ -99,7 +93,6 @@ body {
     cursor: pointer;
 }
 
-/* Botón Submit */
 .btn-custom {
     background-color: var(--btn-color);
     color: var(--paper);
@@ -121,7 +114,6 @@ body {
     opacity: 0.7;
 }
 
-/* Alertas de error de Bootstrap personalizadas */
 .alert-danger {
     background-color: #f8d7da;
     color: #842029;

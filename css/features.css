@@ -19,10 +19,9 @@ body {
 }
 
 .features-section {
-    background-color: var(--bg-color); /* Fondo beige de la sección */
+    background-color: var(--bg-color); 
 }
 
-/* Colores de texto */
 .text-dark-custom {
     color: var(--text-dark);
 }
@@ -31,7 +30,6 @@ body {
     color: #6c757d;
 }
 
-/* --- Link Hover Effect (View All) --- */
 .link-hover-gap {
     gap: 0.5rem;
     transition: gap 0.3s ease, color 0.3s ease;
@@ -39,15 +37,14 @@ body {
 
 .link-hover-gap:hover {
     gap: 0.75rem !important; 
-    color: var(--btn-color); /* Cambia al verde al hacer hover */
+    color: var(--btn-color);
 }
 
-/* --- Product Card Styles --- */
 .product-card {
     display: flex;
     flex-direction: column;
     height: 100%;
-    background-color: var(--paper); /* Fondo blanco de la tarjeta */
+    background-color: var(--paper); 
     transition: box-shadow 0.3s ease;
 }
 
@@ -58,7 +55,7 @@ body {
 .product-img-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 4/5; /* Proporción para que la imagen sea ligeramente más alta que ancha */
+    aspect-ratio: 4/5; 
     overflow: hidden;
     background-color: #e5e5e5;
 }
@@ -74,13 +71,12 @@ body {
     transform: scale(1.03); 
 }
 
-/* Contenedor de la información (Título, precio y carrito) */
 .product-info {
     padding: 1.25rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    background-color: var(--paper); /* Asegura que el fondo inferior sea blanco */
+    background-color: var(--paper); 
 }
 
 .product-title {
@@ -91,14 +87,13 @@ body {
 }
 
 .product-price {
-    font-family: 'Playfair Display', serif; /* Manteniendo el estilo elegante del precio en tu imagen */
+    font-family: 'Playfair Display', serif; 
     font-size: 1.05rem;
     color: var(--text-dark);
     font-weight: 700;
     margin: 0;
 }
 
-/* Botón del carrito */
 .cart-btn {
     background-color: #f7f7f7;
     color: #999;
@@ -119,7 +114,6 @@ body {
     color: var(--paper);
 }
 
-/* --- Animaciones --- */
 .animate-slide-up {
     opacity: 0;
     animation: slideUp 0.6s ease-out forwards;

@@ -27,7 +27,6 @@ body {
     object-fit: cover;
 }
 
-/* bg-gradient-to-r from-academia/95 via-academia/80 to-academia/40 */
 .hero-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -43,7 +42,7 @@ body {
     position: relative;
     z-index: 10;
     width: 100%;
-    max-width: 80rem; /* max-w-7xl */
+    max-width: 80rem;
     margin: 0 auto;
     padding: 0 1rem;
 }
@@ -52,8 +51,7 @@ body {
 @media (min-width: 1024px) { .hero-container { padding: 0 2rem; } }
 
 .hero-content {
-    max-width: 42rem; /* max-w-2xl */
-}
+    max-width: 42rem; 
 
 /* === Est. 2024 === */
 .est-wrapper {
@@ -78,8 +76,8 @@ body {
 }
 
 .hero-title {
-    font-family: ui-serif, Georgia, serif; /* font-serif */
-    font-size: 3.75rem; /* text-6xl */
+    font-family: ui-serif, Georgia, serif; 
+    font-size: 3.75rem; 
     font-weight: 700;
     color: var(--paper);
     margin-bottom: 1.5rem;
@@ -219,4 +217,4 @@ body {
 @keyframes customBounce {
     0%, 100% { transform: translateY(-25%) translateX(-50%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
     50% { transform: translateY(0) translateX(-50%); animation-timing-function: cubic-bezier(0,0,0.2,1); }
-}
+}}

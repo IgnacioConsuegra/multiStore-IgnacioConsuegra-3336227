@@ -3,7 +3,6 @@ fetch('../components/NavBar.html')
     .then(data => {
         document.getElementById('navbar-container').innerHTML = data;
         
-        // Ejecuta la lógica del NavBar ahora que los elementos ya existen en el DOM
         if (typeof initNavBar === 'function') {
             initNavBar();
         }

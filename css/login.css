@@ -21,7 +21,6 @@ body {
     color: #b3b3b3;
 }
 
-/* Custom Input Styling */
 .custom-input-group {
     background-color: var(--input-bg);
     border-radius: 2px;
@@ -52,7 +51,6 @@ body {
     font-size: 0.85rem;
 }
 
-/* Button Styling */
 .btn-custom {
     background-color: var(--btn-color);
     color: white;
@@ -66,7 +64,6 @@ body {
     color: white;
 }
 
-/* Layout Specifics */
 .auth-wrapper {
     flex-grow: 1;
     display: flex;

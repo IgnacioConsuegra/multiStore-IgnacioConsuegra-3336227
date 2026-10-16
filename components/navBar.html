@@ -6,24 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navbar Preview</title>
 
-    <!-- Archivos Locales en Vendor -->
     <link href="../vendor/bootstrap.min.css" rel="stylesheet">
     <link href="../vendor/all.min.css" rel="stylesheet">
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap"
         rel="stylesheet">
 
-    <!-- CSS del Componente -->
     <link rel="stylesheet" href="../css/navBar.css">
 </head>
 
 <body>
 
-   <!-- En tu <head> asegúrate de tener Bootstrap, FontAwesome y tu navbar.css -->
 <header class="navbar-custom sticky-top">
     <div class="container">
         <div class="d-flex align-items-center justify-content-between h-80px">
@@ -62,26 +58,21 @@
                     </span>
                 </a>
 
-                <!-- Contenedor dinámico para Usuario o Sign In -->
                 <div id="user-actions-container" class="d-flex align-items-center">
-                    <!-- JS inyectará el dropdown del usuario o el botón de Login aquí -->
                 </div>
 
-                <!-- Mobile Menu Toggle Button -->
                 <button id="mobile-menu-btn" class="btn d-md-none text-muted-custom border-0 p-2 shadow-none" aria-label="Toggle menu">
                     <i id="mobile-menu-icon" class="fa-solid fa-bars fs-5"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Mobile Menu (Oculto por defecto) -->
         <div id="mobile-menu" class="d-none d-md-none border-top custom-border-light py-3 animate-slide-in">
             <nav class="d-flex flex-column gap-3" id="mobile-nav-container">
                 <a href="/" class="text-decoration-none text-dark-custom fw-medium small">Home</a>
                 <a href="/views/collections.html" class="text-decoration-none text-muted-custom fw-medium small">Collections</a>
                 <a href="/views/about.html" class="text-decoration-none text-muted-custom fw-medium small">About</a>
                 
-                <!-- JS inyectará el Sign In móvil aquí si no hay usuario -->
             </nav>
         </div>
     </div>

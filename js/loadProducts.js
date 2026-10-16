@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('featured-products-grid');
     if (!grid) return;
 
-    // Función que lee del localStorage y renderiza las tarjetas
     const renderProductsFromStorage = () => {
         const storedProducts = JSON.parse(localStorage.getItem('currentProducts')) || [];
         grid.innerHTML = ''; 

@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     
-    // Elementos del DOM
     const tbody = document.getElementById('products-tbody');
     const toggleFormBtn = document.getElementById('toggle-form-btn');
     const cancelFormBtn = document.getElementById('cancel-form-btn');
@@ -8,10 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const productForm = document.getElementById('product-form');
     const formTitle = document.getElementById('form-title');
 
-    // Inicializar productos desde localStorage
     let products = JSON.parse(localStorage.getItem('currentProducts')) || [];
 
-    // --- Renderizar Tabla ---
     function renderTable() {
         tbody.innerHTML = '';
 
@@ -21,12 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         products.forEach(product => {
-            // Determinar color del badge de stock
             let stockClass = 'stock-good';
             if (product.stock < 5) stockClass = 'stock-critical';
             else if (product.stock < 10) stockClass = 'stock-low';
 
-            // Material primario para mostrar bajo el nombre (si existe)
             const materialText = product.materials && product.materials.length > 0 ? product.materials[0] : 'N/A';
             const rating = product.rating || 0;
             const reviews = product.reviews || 0;
@@ -63,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Mostrar / Ocultar Formulario ---
     function toggleForm(show, isEdit = false) {
         if (show) {
             formSection.classList.remove('d-none');
@@ -79,11 +73,9 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleFormBtn.addEventListener('click', () => toggleForm(true, false));
     cancelFormBtn.addEventListener('click', () => toggleForm(false));
 
-    // --- Guardar Producto (Crear o Editar) ---
     productForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // Convertir strings separados por comas en arrays, limpiando espacios
         const parseArray = (str) => str ? str.split(',').map(item => item.trim()).filter(item => item !== '') : [];
 
         const idField = document.getElementById('product-id').value;
@@ -101,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
         if (idField) {
-            // Actualizar existente (manteniendo rating y reviews originales)
             const index = products.findIndex(p => p.id === idField);
             if (index !== -1) {
                 newProduct.rating = products[index].rating || 0;
@@ -109,20 +100,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 products[index] = newProduct;
             }
         } else {
-            // Crear nuevo (valores por defecto para rating)
             newProduct.rating = 0;
             newProduct.reviews = 0;
             products.push(newProduct);
         }
 
-        // Guardar y actualizar
         localStorage.setItem('currentProducts', JSON.stringify(products));
         renderTable();
         toggleForm(false);
         alert(idField ? 'Product updated successfully!' : 'Product added successfully!');
     });
 
-    // --- Funciones Globales para Botones de Tabla ---
     
     window.deleteProduct = function(id) {
         if (confirm('Are you sure you want to delete this product?')) {
@@ -136,7 +124,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const product = products.find(p => p.id === id);
         if (!product) return;
 
-        // Poblar el formulario
         document.getElementById('product-id').value = product.id;
         document.getElementById('prod-name').value = product.name;
         document.getElementById('prod-category').value = product.category;
@@ -153,6 +140,5 @@ document.addEventListener('DOMContentLoaded', () => {
         formSection.scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Render inicial
     renderTable();
 });

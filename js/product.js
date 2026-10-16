@@ -1,18 +1,15 @@
 document.addEventListener('DOMContentLoaded', () => {
     let currentProduct = null;
 
-    // 1. Obtener el ID de la URL
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get('id');
 
     if (productId) {
-        // Leer la "Base de Datos" desde la variable currentProducts del LocalStorage
         let localProducts = JSON.parse(localStorage.getItem('currentProducts'));
 
         if (localProducts && localProducts.length > 0) {
             loadProduct(localProducts);
         } else {
-            // Fallback por si entran directo a la página sin haber pasado por el index
             fetch('products.json')
                 .then(response => response.json())
                 .then(products => {
@@ -31,7 +28,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (product) {
             currentProduct = product; 
 
-            // 3. Inyectar la información básica en el DOM
             document.getElementById('prod-name').textContent = product.name;
             document.getElementById('prod-price').textContent = `$${product.price.toFixed(2)}`;
             document.getElementById('prod-desc').textContent = product.description;
@@ -41,7 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const stockLabel = document.getElementById('prod-stock');
             const addToCartBtn = document.querySelector('.btn-add-cart');
 
-            // Manejo del Stock
             if (product.stock > 0) {
                 stockLabel.textContent = `(${product.stock} in stock)`;
             } else {
@@ -52,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 addToCartBtn.innerHTML = '<i class="fa-solid fa-cart-shopping"></i> Out of Stock';
             }
 
-            // 4. Lógica DINÁMICA de Propiedades
             const propertiesContainer = document.getElementById('prod-properties');
             propertiesContainer.innerHTML = ''; 
 
@@ -68,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         `<button class="property-btn ${index === 0 ? 'active' : ''}">${option}</button>`
                     ).join('');
 
-                    // Asignamos un ID único a cada contenedor para buscarlo correctamente después
                     propertiesContainer.innerHTML += `
                         <div id="prop-container-${propType.key}">
                             <h3 class="property-label">${propType.label}</h3>
@@ -80,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
-            // Reactivar la lógica de selección para los botones recién creados
             const propertyButtons = document.querySelectorAll('.property-btn');
             propertyButtons.forEach(button => {
                 button.addEventListener('click', function() {
@@ -95,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Lógica de Cantidad ---
     const btnMinus = document.getElementById('btn-minus');
     const btnPlus = document.getElementById('btn-plus');
     const qtyValue = document.getElementById('qty-value');
@@ -118,7 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Lógica Añadir al Carrito ---
     const btnAddCart = document.querySelector('.btn-add-cart');
     const successMsg = document.getElementById('success-msg');
 
@@ -126,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnAddCart.addEventListener('click', () => {
             if(!btnAddCart.disabled && currentProduct) {
                 
-                // 1. Buscar las opciones seleccionadas utilizando los IDs únicos de los contenedores
                 const activeSize = document.querySelector('#prop-container-sizes .property-btn.active');
                 const activeColor = document.querySelector('#prop-container-colors .property-btn.active');
                 const activeMaterial = document.querySelector('#prop-container-materials .property-btn.active');
@@ -135,13 +124,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedColor = activeColor ? activeColor.textContent : null;
                 const selectedMaterial = activeMaterial ? activeMaterial.textContent : null;
                 
-                // 2. Obtener cantidad seleccionada
                 const qty = parseInt(document.getElementById('qty-value').textContent);
 
-                // 3. Obtener carrito actual o crear uno nuevo
                 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
-                // 4. Verificar si el producto exacto ya está en el carrito
                 const existingItemIndex = cart.findIndex(item => 
                     item.id === currentProduct.id && 
                     item.selectedSize === selectedSize && 
@@ -150,11 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
 
                 if (existingItemIndex > -1) {
-                    // Si existe, sumar cantidad validando el stock
                     const newQty = cart[existingItemIndex].quantity + qty;
                     cart[existingItemIndex].quantity = Math.min(newQty, currentProduct.stock);
                 } else {
-                    // Si no existe, agregarlo como nuevo item
                     cart.push({
                         id: currentProduct.id,
                         name: currentProduct.name,
@@ -168,10 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
 
-                // 5. Guardar en localStorage y mostrar mensaje de éxito
                 localStorage.setItem('cart', JSON.stringify(cart));
                 
-                // Actualizar contador del Navbar si la función existe globalmente
                 if(typeof initNavBar === 'function') initNavBar();
 
                 successMsg.classList.remove('d-none');
