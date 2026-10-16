@@ -1,0 +1,82 @@
+:root {
+    --bg-color: #F4F1EA;
+    --btn-color: #3f523e;
+    --primary-light: rgba(63, 82, 62, 0.1);
+    --text-dark: #1a1a1a;
+    --paper: #ffffff;
+    --accent: #B8860B;
+    --border-color: rgba(44, 36, 32, 0.1);
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'PT Serif', serif;
+}
+
+.font-heading { font-family: 'Playfair Display', serif; }
+.text-dark-custom { color: var(--text-dark); }
+.text-primary-custom { color: var(--btn-color); }
+.bg-primary-light { background-color: var(--primary-light); }
+.text-accent { color: var(--accent); }
+
+/* Cards */
+.stat-card, .chart-card {
+    background-color: var(--paper);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.stat-label {
+    color: rgba(26, 26, 26, 0.6);
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 0;
+}
+
+/* Charts Containers */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+.pie-chart-container {
+    position: relative;
+    height: 350px;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Low Stock Item */
+.stock-item {
+    background-color: var(--bg-color);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stock-item img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+}

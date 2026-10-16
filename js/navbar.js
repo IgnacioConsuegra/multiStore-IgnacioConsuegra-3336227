@@ -22,7 +22,7 @@ function initNavBar() {
     // 3. Renderizar Menú de Usuario o Botones de Autenticación
     if (userData && userActionsContainer) {
         const isAdmin = userData.role && userData.role.toLowerCase() === 'admin';
-        const adminLinkHTML = isAdmin ? `<a href="/admin" class="dropdown-item-custom" style="color: var(--accent);">Admin Dashboard</a>` : '';
+        const adminLinkHTML = isAdmin ? `<a href="/views/admin.html" class="dropdown-item-custom" style="color: var(--accent);">Admin Dashboard</a>` : '';
 
         userActionsContainer.innerHTML = `
             <div class="user-group">
