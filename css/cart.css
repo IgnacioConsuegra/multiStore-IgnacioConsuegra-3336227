@@ -1,0 +1,110 @@
+:root {
+    --bg-color: #F4F1EA;
+    --btn-color: #3f523e;
+    --text-dark: #1a1a1a;
+    --paper: #ffffff;
+    --accent: #B8860B;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'PT Serif', serif;
+}
+
+.font-heading { font-family: 'Playfair Display', serif; }
+.text-dark-custom { color: var(--text-dark); }
+.text-muted-custom { color: #6c757d; }
+.text-accent-custom { color: var(--accent); }
+.custom-border-light { border-color: rgba(44, 36, 32, 0.1) !important; }
+
+/* Empty state */
+.empty-cart-container { min-height: 100vh; }
+
+/* Links y Botones */
+.back-link {
+    color: rgba(26, 26, 26, 0.6);
+    transition: color 0.2s ease;
+}
+.back-link:hover { color: var(--text-dark); }
+
+.btn-custom {
+    background-color: var(--btn-color);
+    color: var(--paper);
+    border: none;
+    border-radius: 2px;
+    transition: background-color 0.2s;
+}
+.btn-custom:hover { background-color: #2c3a2b; color: var(--paper); }
+
+.btn-outline-custom {
+    background-color: transparent;
+    color: var(--text-dark);
+    border: 1px solid rgba(44, 36, 32, 0.2);
+    border-radius: 2px;
+    transition: all 0.2s;
+}
+.btn-outline-custom:hover {
+    border-color: var(--btn-color);
+    background-color: rgba(63, 82, 62, 0.05);
+}
+
+/* Cart Item Card */
+.cart-item-card {
+    background-color: var(--paper);
+    border: 1px solid rgba(44, 36, 32, 0.1);
+    border-radius: 2px;
+    transition: border-color 0.2s ease;
+}
+.cart-item-card:hover { border-color: rgba(63, 82, 62, 0.2); }
+
+.cart-item-img {
+    width: 96px;
+    height: 128px;
+    background-color: var(--bg-color);
+    border-radius: 2px;
+}
+.cart-item-img img { object-fit: cover; }
+
+.property-badge {
+    background-color: var(--paper);
+    color: var(--text-dark);
+    border: 1px solid rgba(44, 36, 32, 0.1);
+    border-radius: 2px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+/* Cantidad */
+.qty-btn {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: 1px solid rgba(44, 36, 32, 0.2);
+    border-radius: 2px;
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.qty-btn:hover:not(:disabled) { border-color: var(--btn-color); }
+.qty-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-delete {
+    background: transparent;
+    border: none;
+    color: rgba(26, 26, 26, 0.4);
+    transition: color 0.2s ease;
+}
+.btn-delete:hover { color: #dc3545; }
+
+.payment-icon {
+    background-color: var(--paper);
+    border: 1px solid rgba(44, 36, 32, 0.1);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-dark);
+}

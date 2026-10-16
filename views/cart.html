@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+    
+    <link href="../vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../vendor/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/cart.css">
+</head>
+<body>
+
+    <!-- Empty Cart State -->
+    <main id="empty-cart-state" class="empty-cart-container d-none flex-column align-items-center justify-content-center py-5 px-3 text-center">
+        <i class="fa-solid fa-bag-shopping display-1 text-muted-custom opacity-25 mb-4"></i>
+        <h2 class="font-heading fw-bold text-dark-custom fs-2 mb-3">Your cart is empty</h2>
+        <p class="text-muted-custom mb-5">Discover our collection of timeless pieces</p>
+        <a href="/views/collections.html" class="btn btn-custom px-5 py-3 fw-medium">
+            Continue Shopping
+        </a>
+    </main>
+
+    <!-- Populated Cart State -->
+    <main id="populated-cart-state" class="cart-page py-5 d-none">
+        <div class="container py-4">
+            
+            <!-- Header -->
+            <div class="mb-5">
+                <a href="/views/collections.html" class="back-link d-inline-flex align-items-center gap-2 mb-4 text-decoration-none">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Continue Shopping</span>
+                </a>
+                <h1 class="font-heading fw-bold text-dark-custom display-5">Shopping Cart</h1>
+            </div>
+
+            <div class="row g-5">
+                
+                <!-- Cart Items List -->
+                <div class="col-12 col-lg-8 d-flex flex-column gap-3" id="cart-items-container">
+                    <!-- Los items se inyectarán por JS -->
+                </div>
+
+                <!-- Order Summary -->
+                <div class="col-12 col-lg-4">
+                    <div class="summary-card border custom-border-light rounded-1 p-4 bg-white sticky-top" style="top: 2rem;">
+                        <h2 class="font-heading fw-bold text-dark-custom fs-4 mb-4">Order Summary</h2>
+                        
+                        <div class="d-flex flex-column gap-3 mb-4 text-muted-custom">
+                            <div class="d-flex justify-content-between">
+                                <span>Subtotal</span>
+                                <span class="fw-medium text-dark-custom" id="summary-subtotal">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span>Shipping</span>
+                                <span class="fw-medium text-dark-custom" id="summary-shipping">FREE</span>
+                            </div>
+                            <p id="shipping-notice" class="text-accent-custom small mb-0 d-none">
+                                <!-- Texto de aviso de envío inyectado por JS -->
+                            </p>
+                            
+                            <div class="border-top custom-border-light pt-3 mt-1">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="font-heading fw-semibold text-dark-custom fs-5">Total</span>
+                                    <span class="font-heading fw-bold text-dark-custom fs-4" id="summary-total">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button id="checkout-btn" class="btn btn-custom w-100 py-3 mb-3 fw-medium">
+                            Proceed to Checkout
+                        </button>
+                        
+                        <a href="/views/collections.html" class="btn btn-outline-custom w-100 py-3 fw-medium">
+                            Continue Shopping
+                        </a>
+
+                        <!-- Payment Icons -->
+                        <div class="mt-4 pt-4 border-top custom-border-light text-center">
+                            <p class="text-muted-custom small mb-3">We accept</p>
+                            <div class="d-flex justify-content-center gap-2">
+                                <span class="payment-icon">VISA</span>
+                                <span class="payment-icon">MC</span>
+                                <span class="payment-icon">AMEX</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <script src="../vendor/bootstrap.bundle.min.js"></script>
+    <script src="../js/cart.js"></script>
+</body>
+</html>

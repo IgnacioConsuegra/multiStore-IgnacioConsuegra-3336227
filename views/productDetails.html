@@ -22,6 +22,7 @@
 </head>
 
 <body>
+        <div id="navbar-container"></div>
 
     <main class="product-page py-5">
         <div class="container py-4">
@@ -88,7 +89,7 @@
                         <div class="d-flex gap-3 mt-2">
                             <!-- Añadida la clase identificadora btn-add-cart a nivel de JS -->
                             <button
-                                class="btn btn-add-cart flex-grow-1 d-flex justify-content-center align-items-center gap-2">
+                                class=" btn-add-cart flex-grow-1 d-flex justify-content-center align-items-center gap-2">
                                 <i class="fa-solid fa-cart-shopping"></i> Add to Cart
                             </button>
                             <button class="btn btn-wishlist d-flex justify-content-center align-items-center"
@@ -132,10 +133,15 @@
             </div>
         </div>
     </main>
+    <div id="footer-container"></div>
 
     <!-- JS de Bootstrap -->
     <script src="../vendor/bootstrap.bundle.min.js"></script>
     <script src="../js/product.js"></script>
+
+    <script src="../js/navbar.js"></script>
+    <script src="../js/fetchNavBar.js"></script>
+    <script src="../js/loadProducts.js"></script>
 </body>
 
 </html>
