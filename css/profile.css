@@ -152,3 +152,9 @@ body {
 main.profile-wrapper {
     background-color: var(--bg-color);
 }
+
+
+main.profile-wrapper{
+    background-color: var(--bg-color);
+    min-height: 100vh;
+}

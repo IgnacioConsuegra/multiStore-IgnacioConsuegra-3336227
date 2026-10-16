@@ -80,3 +80,7 @@ body {
     object-fit: cover;
     border-radius: 4px;
 }
+main.dashboard-wrapper{
+    background-color: var(--bg-color);
+    min-height: 100vh;
+}

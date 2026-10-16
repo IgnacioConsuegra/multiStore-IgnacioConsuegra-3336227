@@ -1,0 +1,86 @@
+:root {
+    --bg-color: #F4F1EA;
+    --btn-color: #3f523e;
+    --text-dark: #1a1a1a;
+    --paper: #ffffff;
+    --border-color: rgba(44, 36, 32, 0.1);
+    --light-custom: rgba(44, 36, 32, 0.02);
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'PT Serif', serif;
+}
+
+.font-heading { font-family: 'Playfair Display', serif; }
+.font-sans { font-family: system-ui, -apple-system, sans-serif; }
+.tracking-wider { letter-spacing: 0.05em; }
+
+.bg-paper { background-color: var(--paper); }
+.bg-light-custom { background-color: var(--light-custom); }
+.text-dark-custom { color: var(--text-dark); }
+.text-muted-custom { color: #6c757d; }
+.custom-border-light { border-color: var(--border-color) !important; }
+
+.max-w-7xl { max-width: 80rem; margin: 0 auto; }
+
+/* Tabla */
+.custom-table th { border-bottom-width: 1px; color: rgba(26, 26, 26, 0.8); }
+.custom-table td { border-bottom: 1px solid var(--border-color); }
+.custom-table tr:hover td { background-color: rgba(44, 36, 32, 0.02); transition: background-color 0.2s; }
+
+.product-img-table {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 2px;
+    border: 1px solid var(--border-color);
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 50rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    font-family: system-ui, -apple-system, sans-serif;
+    border: 1px solid transparent;
+}
+.status-pending { background-color: #fef3c7; color: #92400e; border-color: #fde68a; }
+.status-processing { background-color: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+.status-shipped { background-color: #f3e8ff; color: #7e22ce; border-color: #e9d5ff; }
+.status-delivered { background-color: #dcfce3; color: #166534; border-color: #bbf7d0; }
+.status-cancelled { background-color: #fee2e2; color: #991b1b; border-color: #fecaca; }
+
+/* Select Dropdown para cambiar estado */
+.status-select {
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 0.875rem;
+    border: 1px solid rgba(44, 36, 32, 0.2);
+    border-radius: 2px;
+    padding: 0.25rem 1.5rem 0.25rem 0.5rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    background-color: var(--paper);
+    transition: all 0.2s;
+}
+.status-select:focus {
+    border-color: var(--text-dark);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(44, 36, 32, 0.05);
+}
+
+/* Animaciones */
+.animate-fade-in {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+
+main.admin-orders-wrapper{
+    background-color: var(--bg-color);
+    min-height: 100vh;
+}

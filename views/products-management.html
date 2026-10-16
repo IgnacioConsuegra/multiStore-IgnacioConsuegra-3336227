@@ -19,11 +19,12 @@
 
     <main class="management-wrapper py-5">
         <div class="container">
-            
+                        <div id="adminManagement"></div>
+
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-5">
-                <h2 class="font-heading fw-bold text-dark-custom mb-0 fs-2">Product Management</h2>
-                <button id="toggle-form-btn" class="btn btn-custom px-4 py-2 d-flex align-items-center gap-2">
+                <h2 class="font-heading fw-bold text-dark-custom mb-0 fs-4">Product Management</h2>
+                <button id="toggle-form-btn" class=" btn-custom px-4 py-2 d-flex align-items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Add Product
                 </button>
             </div>
@@ -86,8 +87,8 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-3">
-                        <button type="button" id="cancel-form-btn" class="btn btn-outline-custom px-4 py-2">Cancel</button>
-                        <button type="submit" class="btn btn-custom px-5 py-2">Save Product</button>
+                        <button type="button" id="cancel-form-btn" class=" btn-outline-custom px-4 py-2">Cancel</button>
+                        <button type="submit" class=" btn-custom px-5 py-2">Save Product</button>
                     </div>
                 </form>
             </div>
@@ -115,9 +116,13 @@
 
         </div>
     </main>
+    <div id="footer-container"></div>
 
     <script src="../vendor/bootstrap.bundle.min.js"></script>
     <script src="../js/products-management.js"></script>
         <script src="../js/fetchNavBar.js"></script>
+            <script src="../js/fetchAdminNav.js"></script>
+    <script src="../js/navbar.js"></script>
+
 </body>
 </html>

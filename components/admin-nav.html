@@ -1,0 +1,40 @@
+<style>
+    .admin-tab-link {
+        background: none;
+        border: none;
+        padding: 0 0.5rem 1rem 0.5rem;
+        font-weight: 500;
+        color: rgba(26, 26, 26, 0.6);
+        position: relative;
+        text-decoration: none;
+        transition: color 0.2s ease;
+        font-family: 'PT Serif', serif;
+    }
+    .admin-tab-link:hover {
+        color: var(--text-dark, #1a1a1a);
+    }
+    .admin-tab-link.active {
+        color: var(--text-dark, #1a1a1a);
+        font-weight: 600;
+    }
+    .admin-tab-link.active::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: var(--text-dark, #1a1a1a);
+    }
+</style>
+
+<div class="mb-5">
+    <h1 class="font-heading fw-bold text-dark-custom display-5 mb-4">Admin Dashboard</h1>
+    <div class="border-bottom custom-border-light">
+        <nav class="d-flex gap-4">
+            <a href="admin.html" class="admin-tab-link" id="nav-analytics">Analytics</a>
+            <a href="products-management.html" class="admin-tab-link" id="nav-products">Products</a>
+            <a href="admin-orders.html" class="admin-tab-link" id="nav-orders">Orders</a>
+        </nav>
+    </div>
+</div>
