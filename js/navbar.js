@@ -26,7 +26,7 @@ function initNavBar() {
 
         userActionsContainer.innerHTML = `
             <div class="user-group">
-                <a href="/profile" class="action-btn text-muted-custom text-decoration-none" aria-label="Profile">
+                <a href="/views/profile.html" class="action-btn text-muted-custom text-decoration-none" aria-label="Profile">
                     <i class="fa-solid fa-user"></i>
                 </a>
                 
@@ -36,8 +36,8 @@ function initNavBar() {
                         <p class="mb-0 text-muted-custom" style="font-size: 0.75rem;">${userData.email}</p>
                     </div>
                     <div class="py-1">
-                        <a href="/profile" class="dropdown-item-custom">My Profile</a>
-                        <a href="/orders" class="dropdown-item-custom">Orders</a>
+                        <a href="/views/profile.html" class="dropdown-item-custom">My Profile</a>
+                        <a href="/views/profile.html" class="dropdown-item-custom">Orders</a>
                         ${adminLinkHTML}
                     </div>
                     <div class="border-top custom-border-light py-1">

@@ -18,7 +18,7 @@ body {
 .custom-border-light { border-color: rgba(44, 36, 32, 0.1) !important; }
 
 /* Empty state */
-.empty-cart-container { min-height: 100vh; }
+.empty-cart-container { min-height: 100vh; background-color: var(--bg-color); }
 
 /* Links y Botones */
 .back-link {
@@ -26,24 +26,27 @@ body {
     transition: color 0.2s ease;
 }
 .back-link:hover { color: var(--text-dark); }
-
+.cart-page{
+    background-color: var(--bg-color);
+}
 .btn-custom {
     background-color: var(--btn-color);
     color: var(--paper);
     border: none;
     border-radius: 2px;
     transition: background-color 0.2s;
+    text-decoration: none;
 }
 .btn-custom:hover { background-color: #2c3a2b; color: var(--paper); }
 
-.btn-outline-custom {
+a.btn-outline-custom {
     background-color: transparent;
     color: var(--text-dark);
-    border: 1px solid rgba(44, 36, 32, 0.2);
     border-radius: 2px;
     transition: all 0.2s;
+    border: 1px solid rgba(44, 36, 32, 0.2);
 }
-.btn-outline-custom:hover {
+a.btn-outline-custom:hover {
     border-color: var(--btn-color);
     background-color: rgba(63, 82, 62, 0.05);
 }

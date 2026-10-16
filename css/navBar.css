@@ -11,7 +11,7 @@
 
 /* Base NavBar */
 .navbar-custom {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--bg-color);
     backdrop-filter: blur(8px);
     border-bottom: 1px solid rgba(44, 36, 32, 0.1);
     z-index: 1050;
