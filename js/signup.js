@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submit-btn');
 
     signupForm.addEventListener('submit', (e) => {
-        e.preventDefault(); // Evita que la página se recargue
+        e.preventDefault(); 
 
         // Resetear mensajes de error
         errorMessage.classList.add('d-none');
@@ -35,6 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 3. Lógica de "Base de Datos" con localStorage
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+
+        // Validar si el correo ya está registrado
+        const emailExists = users.some(u => u.email.toLowerCase() === email.toLowerCase());
+        if (emailExists) {
+            showError("An account with this email already exists.");
+            return;
+        }
+
         const userData = {
             id: Date.now().toString(),
             name: name,
@@ -48,26 +58,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 zipCode: zipCode,
                 country: country
             },
-            role: "Admin", 
+            role: "Admin", // Nota: si tienes clientes normales, considera cambiar esto a "Customer" por defecto
             createdAt: new Date().toISOString()
         };
 
         submitBtn.disabled = true;
         submitBtn.textContent = 'Creating account...';
-        localStorage.setItem('user', JSON.stringify(userData));
 
         setTimeout(() => {
             try {
+                // 4. Guardar el nuevo usuario en el arreglo general de usuarios
+                users.push(userData);
+                localStorage.setItem('users', JSON.stringify(users));
+
+                // 5. Iniciar la sesión actual
+                localStorage.setItem('user', JSON.stringify(userData));
                 
                 alert("Account created successfully!");
                 
-                // Si tienes la página index o login, puedes redirigir así:
-                // window.location.href = 'index.html'; 
-                
-                // Restaurar botón (por si no rediriges)
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Account';
-                signupForm.reset();
+                // Redirigir al inicio o panel
                 window.location.href = "../index.html"; 
 
             } catch (error) {
@@ -75,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Account';
             }
-        }, 1000); // 1 segundo de "carga"
+        }, 1000); 
     });
 
     // Función auxiliar para mostrar errores

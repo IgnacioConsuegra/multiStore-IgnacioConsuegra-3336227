@@ -79,25 +79,12 @@
             </form>
         </div>
     </main>
+    <div id="footer-container"></div>
 
     <!-- JS Local en Vendor -->
-    <script src="../vendor/bootstrap.bundle.min.js"></script>
-    <script>
-        document.querySelector('form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            console.log("Login form submitted!");
-        });
-    </script>
-    <script>
-        fetch('../components/navBar.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('navbar-container').innerHTML = data;
-            });
-
-    </script>
-        <script src="../js/fetchNavBar.js"></script>
+    <script src="../js/fetchNavBar.js"></script>
     <script src="../js/navbar.js"></script>
+    <script src="../js/login.js"></script>
 </body>
 
 </html>

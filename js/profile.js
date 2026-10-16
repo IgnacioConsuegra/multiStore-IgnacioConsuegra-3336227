@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSave.addEventListener('click', (e) => {
         e.preventDefault();
         
-        // Actualizar objeto usuario
         user.name = document.getElementById('prof-name').value;
         user.phone = document.getElementById('prof-phone').value;
         
@@ -93,23 +92,29 @@ document.addEventListener('DOMContentLoaded', () => {
         user.address.zipCode = document.getElementById('prof-zip').value;
         user.address.country = document.getElementById('prof-country').value;
 
-        // Guardar en localStorage
         localStorage.setItem('user', JSON.stringify(user));
+
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        const userIndex = users.findIndex(u => u.email === user.email);
+        
+        if (userIndex !== -1) {
+            users[userIndex] = user; 
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+
         toggleEditMode(false);
         
-        // Actualizar navbar si la función existe globalmente
         if(typeof initNavBar === 'function') initNavBar();
+        
     });
 
     btnLogout.addEventListener('click', () => {
         localStorage.removeItem('user');
-        window.location.href = 'index.html';
+        window.location.href = '../index.html';
     });
 
-    // Carga inicial de datos del perfil
     loadUserData();
 
-    // 4. Lógica de Historial de Órdenes
     function getStatusClass(status) {
         const s = status.toLowerCase();
         if (s.includes('pending')) return 'status-pending';

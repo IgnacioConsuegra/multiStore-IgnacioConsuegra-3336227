@@ -20,7 +20,7 @@
 <body>
     <div id="navbar-container"></div>
 
-    <main class="collection-section py-5">
+<main class="collection-section py-5">
         <div class="container py-4">
             
             <!-- Header -->
@@ -29,7 +29,7 @@
                     Our Collection
                 </h1>
                 <p class="text-muted-custom fs-6">
-                    <span id="item-count">2</span> items found
+                    <span id="item-count">0</span> items found
                 </p>
             </div>
 
@@ -37,21 +37,21 @@
             <div class="mb-5">
                 <!-- Search Bar -->
                 <div class="position-relative mb-4">
-                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
-                    <input type="text" class="custom-search-input w-100" placeholder="Search by name, category, or description...">
+                    <i class="fa-solid fa-magnifying-glass position-absolute" style="left: 1rem; top: 50%; transform: translateY(-50%); color: #6c757d;"></i>
+                    <input type="text" id="search-input" class="form-control" style="padding-left: 2.5rem; border-radius: 2px;" placeholder="Search by name, category, or description...">
                 </div>
 
                 <!-- Filter and Sort Bar -->
                 <div class="d-flex flex-column flex-sm-row gap-3 justify-content-between align-items-start align-items-sm-center">
                     
                     <!-- Botón para abrir filtros -->
-                    <button class="filter-toggle-btn d-flex align-items-center gap-2" type="button" data-bs-toggle="collapse" data-bs-target="#filtersPanel" aria-expanded="false" aria-controls="filtersPanel">
+                    <button class="btn btn-outline-dark d-flex align-items-center gap-2 rounded-1" type="button" data-bs-toggle="collapse" data-bs-target="#filtersPanel" aria-expanded="false" aria-controls="filtersPanel">
                         <i class="fa-solid fa-sliders"></i>
                         <span class="fw-medium">Filters</span>
                     </button>
 
                     <!-- Sort Select -->
-                    <select class="custom-sort-select">
+                    <select id="sort-select" class="form-select w-auto rounded-1">
                         <option value="featured">Featured</option>
                         <option value="price-low">Price: Low to High</option>
                         <option value="price-high">Price: High to Low</option>
@@ -63,21 +63,24 @@
 
             <!-- Filters Panel (Colapsable con Bootstrap) -->
             <div class="collapse mb-5" id="filtersPanel">
-                <div class="filters-panel-body">
+                <div class="card card-body border-0 bg-light rounded-1">
                     <div class="row g-4">
                         
                         <!-- Category -->
                         <div class="col-12 col-sm-6 col-lg-3">
                             <h3 class="font-heading h6 fw-bold mb-3 text-dark-custom">Category</h3>
-                            <div class="d-flex flex-column gap-2">
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Literature</span>
+                            <div class="d-flex flex-column gap-2" id="filter-category">
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Literature" class="filter-check category-check"> <span>Literature</span>
                                 </label>
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Accessories</span>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Accessories" class="filter-check category-check"> <span>Accessories</span>
                                 </label>
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Leather Goods</span>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Leather Goods" class="filter-check category-check"> <span>Leather Goods</span>
+                                </label>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Clothing" class="filter-check category-check"> <span>Clothing</span>
                                 </label>
                             </div>
                         </div>
@@ -85,15 +88,18 @@
                         <!-- Size -->
                         <div class="col-12 col-sm-6 col-lg-3">
                             <h3 class="font-heading h6 fw-bold mb-3 text-dark-custom">Size</h3>
-                            <div class="d-flex flex-column gap-2">
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Small</span>
+                            <div class="d-flex flex-column gap-2" id="filter-size">
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="S" class="filter-check size-check"> <span>Small (S)</span>
                                 </label>
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Medium</span>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="M" class="filter-check size-check"> <span>Medium (M)</span>
                                 </label>
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Large</span>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="L" class="filter-check size-check"> <span>Large (L)</span>
+                                </label>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="XL" class="filter-check size-check"> <span>Extra Large (XL)</span>
                                 </label>
                             </div>
                         </div>
@@ -101,15 +107,15 @@
                         <!-- Color -->
                         <div class="col-12 col-sm-6 col-lg-3">
                             <h3 class="font-heading h6 fw-bold mb-3 text-dark-custom">Color</h3>
-                            <div class="d-flex flex-column gap-2">
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Black</span>
+                            <div class="d-flex flex-column gap-2" id="filter-color">
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Black" class="filter-check color-check"> <span>Black</span>
                                 </label>
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Brown</span>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Brown" class="filter-check color-check"> <span>Brown</span>
                                 </label>
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Navy</span>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Navy" class="filter-check color-check"> <span>Navy</span>
                                 </label>
                             </div>
                         </div>
@@ -117,75 +123,35 @@
                         <!-- Material -->
                         <div class="col-12 col-sm-6 col-lg-3">
                             <h3 class="font-heading h6 fw-bold mb-3 text-dark-custom">Material</h3>
-                            <div class="d-flex flex-column gap-2">
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Leather</span>
+                            <div class="d-flex flex-column gap-2" id="filter-material">
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Leather" class="filter-check material-check"> <span>Leather</span>
                                 </label>
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Wool</span>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Wool" class="filter-check material-check"> <span>Wool</span>
                                 </label>
-                                <label class="custom-checkbox">
-                                    <input type="checkbox"> <span>Paper</span>
+                                <label class="custom-checkbox d-flex align-items-center gap-2">
+                                    <input type="checkbox" value="Cashmere" class="filter-check material-check"> <span>Cashmere</span>
                                 </label>
                             </div>
                         </div>
                     </div>
 
                     <!-- Price Range -->
-                    <div class="mt-4 pt-4 border-top custom-border-light">
+                    <div class="mt-4 pt-4 border-top">
                         <h3 class="font-heading h6 fw-bold mb-3 text-dark-custom">Price Range</h3>
-                        <div class="d-flex align-items-center gap-3">
-                            <input type="number" class="custom-price-input" value="0" min="0">
+                        <div class="d-flex align-items-center gap-3" style="max-width: 300px;">
+                            <input type="number" id="price-min" class="form-control rounded-1" value="0" min="0" placeholder="Min $">
                             <span class="text-muted-custom">to</span>
-                            <input type="number" class="custom-price-input" value="500" min="0">
+                            <input type="number" id="price-max" class="form-control rounded-1" value="1000" min="0" placeholder="Max $">
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Products Grid -->
-            <div class="row g-4">
-                
-                <!-- Product Card 1 -->
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="product-card">
-                        <a href="#" class="text-decoration-none d-block">
-                            <div class="product-img-wrapper">
-                                <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?w=500" alt="Cashmere Beanie">
-                            </div>
-                        </a>
-                        <div class="product-info">
-                            <div>
-                                <h3 class="font-heading product-title">Cashmere Beanie</h3>
-                                <p class="product-price">$90.00</p>
-                            </div>
-                            <button class="cart-btn" aria-label="Add to cart">
-                                <i class="fa-solid fa-cart-shopping"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Product Card 2 -->
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="product-card">
-                        <a href="#" class="text-decoration-none d-block">
-                            <div class="product-img-wrapper">
-                                <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500" alt="Quilted Jacket">
-                            </div>
-                        </a>
-                        <div class="product-info">
-                            <div>
-                                <h3 class="font-heading product-title">Quilted Jacket</h3>
-                                <p class="product-price">$280.00</p>
-                            </div>
-                            <button class="cart-btn" aria-label="Add to cart">
-                                <i class="fa-solid fa-cart-shopping"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
+            <div class="row g-4" id="products-grid">
+                <!-- Los productos filtrados se inyectan aquí vía JS -->
             </div>
 
         </div>
@@ -200,5 +166,6 @@
     <script src="../vendor/bootstrap.bundle.min.js"></script>
     <script src="../js/fetchNavBar.js"></script>
     <script src="../js/navbar.js"></script>
+    <script src="../js/collections.js"></script>
 </body>
 </html>
