@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     errorMessage.style.textAlign = 'center';
     loginForm.insertBefore(errorMessage, loginForm.firstChild);
 
-    loginForm.addEventListener('submit', (e) => {
+    loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         errorMessage.classList.add('d-none');
@@ -19,28 +19,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const email = emailInput.value.trim();
         const password = passwordInput.value;
 
-        const users = JSON.parse(localStorage.getItem('users')) || [];
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Signing in...';
 
-        const foundUser = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password);
+        try {
+            const response = await fetch('../backend/api/login.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
 
-        if (foundUser) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Signing in...';
+            const result = await response.json();
 
-            setTimeout(() => {
-                localStorage.setItem('user', JSON.stringify(foundUser));
+            if (response.ok && result.status === 'success') {
+                // Guardamos la sesión activa en localStorage con los datos de MySQL
+                localStorage.setItem('user', JSON.stringify(result.user));
 
-                if (foundUser.role === 'Admin') {
-                    window.location.href = 'admin.html'; 
+                if (result.user.role === 'Admin') {
+                    window.location.href = 'admin.html';
                 } else {
-                    window.location.href = '../index.html'; 
+                    window.location.href = '../index.html';
                 }
-            }, 800); 
-        } else {
-            errorMessage.textContent = 'Correo electrónico o contraseña incorrectos.';
+            } else {
+                errorMessage.textContent = result.message || 'Correo electrónico o contraseña incorrectos.';
+                errorMessage.classList.remove('d-none');
+                passwordInput.value = '';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign in';
+            }
+        } catch (error) {
+            console.error('Error en login:', error);
+            errorMessage.textContent = 'Error de conexión con el servidor.';
             errorMessage.classList.remove('d-none');
-            
-            passwordInput.value = '';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign in';
         }
     });
 });

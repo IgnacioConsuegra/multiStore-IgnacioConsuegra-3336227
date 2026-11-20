@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessage = document.getElementById('error-message');
     const submitBtn = document.getElementById('submit-btn');
 
-    signupForm.addEventListener('submit', (e) => {
+    signupForm.addEventListener('submit', async  (e) => {
         e.preventDefault(); 
 
         errorMessage.classList.add('d-none');
@@ -39,8 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const userData = {
-            id: Date.now().toString(),
+    const userData = {
             name: name,
             email: email,
             phone: phone,
@@ -51,31 +50,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 state: state,
                 zipCode: zipCode,
                 country: country
-            },
-            role: "Admin", 
-            createdAt: new Date().toISOString()
+            }
         };
 
         submitBtn.disabled = true;
         submitBtn.textContent = 'Creating account...';
 
-        setTimeout(() => {
-            try {
-                users.push(userData);
-                localStorage.setItem('users', JSON.stringify(users));
+        try {
+            const response = await fetch('../backend/api/signup.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
 
-                localStorage.setItem('user', JSON.stringify(userData));
-                
+            const result = await response.json();
+
+            if (response.ok && result.status === 'success') {
+                localStorage.setItem('user', JSON.stringify(result.user));
                 alert("Account created successfully!");
-                
-                window.location.href = "../index.html"; 
-
-            } catch (error) {
-                showError("An error occurred while saving your data.");
+                window.location.href = "../index.html";
+            } else {
+                showError(result.message || "Could not create account.");
                 submitBtn.disabled = false;
                 submitBtn.textContent = 'Create Account';
             }
-        }, 1000); 
+
+        } catch (error) {
+            console.error("Error en fetch:", error);
+            showError("Connection error with the server.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create Account';
+        }
     });
 
     function showError(message) {
