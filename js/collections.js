@@ -188,16 +188,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         products.forEach((product, index) => {
             const delay = (index % 4) * 100;
             const isOutOfStock = product.stock <= 0;
+            const hasDiscount = product.discount > 0;
             const categoriesLabel = (product.categories || []).join(' • ');
 
+            // Insignia izquierda: Sin stock
             const stockBadge = isOutOfStock
-                ? `<span class="badge bg-secondary position-absolute top-0 start-0 m-3">Out of Stock</span>`
+                ? `<span class="badge bg-secondary position-absolute top-0 start-0 m-3 z-2">Out of Stock</span>`
                 : '';
+
+            // Insignia derecha: Mayor descuento de sus categorías
+            const discountBadge = hasDiscount
+                ? `<span class="badge bg-danger position-absolute top-0 end-0 m-3 z-2">-${product.discount}%</span>`
+                : '';
+
+            // Bloque de precio (tachado + rebajado si hay descuento)
+            const priceHtml = hasDiscount
+                ? `<p class="product-price mb-0">
+                       <span class="text-muted text-decoration-line-through me-2" style="font-size: 0.85rem;">$${Number(product.originalPrice).toFixed(2)}</span>
+                       <span class="text-danger fw-bold">$${Number(product.price).toFixed(2)}</span>
+                   </p>`
+                : `<p class="product-price mb-0">$${Number(product.price).toFixed(2)}</p>`;
 
             const card = `
                 <div class="col-12 col-sm-6 col-lg-3 animate-slide-up" style="animation-delay: ${delay}ms;">
                     <div class="product-card position-relative">
                         ${stockBadge}
+                        ${discountBadge}
                         <a href="productDetails.html?id=${product.id}" class="text-decoration-none d-block">
                             <div class="product-img-wrapper">
                                 <img src="${product.image}" alt="${product.name}">
@@ -207,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div>
                                 <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">${categoriesLabel}</small>
                                 <h3 class="font-heading product-title">${product.name}</h3>
-                                <p class="product-price">$${Number(product.price).toFixed(2)}</p>
+                                ${priceHtml}
                             </div>
                             <button class="cart-btn" 
                                     onclick="addToCart('${product.id}')" 

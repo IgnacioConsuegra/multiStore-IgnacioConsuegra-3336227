@@ -5,15 +5,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const renderProducts = (products) => {
         grid.innerHTML = ''; 
         
-        // Filtrar destacados si existen, o tomar los primeros 4
         const featured = products.filter(p => p.featured);
         const toRender = (featured.length > 0 ? featured : products).slice(0, 4);
 
         toRender.forEach((product, index) => {
             const delay = index * 100;
+            const hasDiscount = product.discount > 0;
+
+            const discountBadge = hasDiscount
+                ? `<span class="badge bg-danger position-absolute top-0 end-0 m-3 z-2">-${product.discount}%</span>`
+                : '';
+
+            const priceHtml = hasDiscount
+                ? `<p class="product-price mb-0">
+                       <span class="text-muted text-decoration-line-through me-2" style="font-size: 0.85rem;">$${Number(product.originalPrice).toFixed(2)}</span>
+                       <span class="text-danger fw-bold">$${Number(product.price).toFixed(2)}</span>
+                   </p>`
+                : `<p class="product-price mb-0">$${Number(product.price).toFixed(2)}</p>`;
+
             const card = `
                 <div class="col-12 col-sm-6 col-lg-3 animate-slide-up" style="animation-delay: ${delay}ms;">
-                    <div class="product-card">
+                    <div class="product-card position-relative">
+                        ${discountBadge}
                         <a href="views/productDetails.html?id=${product.id}" class="text-decoration-none d-block">
                             <div class="product-img-wrapper">
                                 <img src="${product.image}" alt="${product.name}">
@@ -22,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="product-info">
                             <div>
                                 <h3 class="font-heading product-title">${product.name}</h3>
-                                <p class="product-price">$${Number(product.price).toFixed(2)}</p>
+                                ${priceHtml}
                             </div>
                             <button class="cart-btn" onclick="addToCart('${product.id}')" aria-label="Add to cart">
                                 <i class="fa-solid fa-cart-shopping"></i>

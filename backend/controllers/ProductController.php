@@ -16,6 +16,7 @@ class ProductController {
                     p.destacado, 
                     p.opciones,
                     GROUP_CONCAT(DISTINCT c.nombre SEPARATOR ',') AS categorias,
+                    COALESCE(MAX(c.porcentaje_descuento), 0) AS max_descuento,
                     COALESCE((SELECT SUM(stock) FROM producto_variantes WHERE id_producto = p.id_producto), 0) AS stock_total
                   FROM productos p
                   LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
@@ -43,6 +44,7 @@ class ProductController {
                     p.destacado, 
                     p.opciones,
                     GROUP_CONCAT(DISTINCT c.nombre SEPARATOR ',') AS categorias,
+                    COALESCE(MAX(c.porcentaje_descuento), 0) AS max_descuento,
                     COALESCE((SELECT SUM(stock) FROM producto_variantes WHERE id_producto = p.id_producto), 0) AS stock_total
                   FROM productos p
                   LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
@@ -65,7 +67,6 @@ class ProductController {
         }
     }
 
-    // Mapea la fila de MySQL al formato exacto que espera el Frontend
     private function formatProduct($row) {
         $imagenes = json_decode($row['imagenes_base'], true) ?: [];
         $opciones = json_decode($row['opciones'], true) ?: [];
@@ -82,14 +83,20 @@ class ProductController {
             if ($name === 'material') $materials = $opt['values'] ?? [];
         }
 
+        $basePrice = (float)$row['precio_base'];
+        $discount = (float)$row['max_descuento'];
+        $finalPrice = $discount > 0 ? $basePrice * (1 - ($discount / 100)) : $basePrice;
+
         return [
             "id" => (string)$row['id_producto'],
             "name" => $row['nombre'],
-            "price" => (float)$row['precio_base'],
+            "price" => round($finalPrice, 2),       // Precio final ya con el descuento aplicado
+            "originalPrice" => $basePrice,          // Precio original por si quieres mostrarlo tachado
+            "discount" => $discount,                // Mayor porcentaje de descuento entre sus categorías
             "image" => $imagenes[0] ?? '',
             "description" => $row['descripcion'],
-            "category" => $categoriesList[0] ?? 'Uncategorized', // Mantiene compatibilidad con scripts antiguos
-            "categories" => $categoriesList,                     // Arreglo con todas las categorías del producto
+            "category" => $categoriesList[0] ?? 'Uncategorized',
+            "categories" => $categoriesList,
             "stock" => (int)$row['stock_total'],
             "featured" => (bool)$row['destacado'],
             "sizes" => $sizes,
