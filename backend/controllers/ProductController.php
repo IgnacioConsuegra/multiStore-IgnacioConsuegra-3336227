@@ -15,11 +15,11 @@ class ProductController {
                     p.imagenes_base, 
                     p.destacado, 
                     p.opciones,
-                    c.nombre AS categoria,
-                    COALESCE(SUM(pv.stock), 0) AS stock_total
+                    GROUP_CONCAT(DISTINCT c.nombre SEPARATOR ',') AS categorias,
+                    COALESCE((SELECT SUM(stock) FROM producto_variantes WHERE id_producto = p.id_producto), 0) AS stock_total
                   FROM productos p
-                  LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
-                  LEFT JOIN producto_variantes pv ON p.id_producto = pv.id_producto
+                  LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
+                  LEFT JOIN categorias c ON pc.id_categoria = c.id_categoria
                   GROUP BY p.id_producto
                   ORDER BY p.id_producto ASC";
 
@@ -42,11 +42,11 @@ class ProductController {
                     p.imagenes_base, 
                     p.destacado, 
                     p.opciones,
-                    c.nombre AS categoria,
-                    COALESCE(SUM(pv.stock), 0) AS stock_total
+                    GROUP_CONCAT(DISTINCT c.nombre SEPARATOR ',') AS categorias,
+                    COALESCE((SELECT SUM(stock) FROM producto_variantes WHERE id_producto = p.id_producto), 0) AS stock_total
                   FROM productos p
-                  LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
-                  LEFT JOIN producto_variantes pv ON p.id_producto = pv.id_producto
+                  LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
+                  LEFT JOIN categorias c ON pc.id_categoria = c.id_categoria
                   WHERE p.id_producto = :id
                   GROUP BY p.id_producto
                   LIMIT 1";
@@ -69,6 +69,7 @@ class ProductController {
     private function formatProduct($row) {
         $imagenes = json_decode($row['imagenes_base'], true) ?: [];
         $opciones = json_decode($row['opciones'], true) ?: [];
+        $categoriesList = !empty($row['categorias']) ? explode(',', $row['categorias']) : [];
 
         $sizes = [];
         $colors = [];
@@ -87,7 +88,8 @@ class ProductController {
             "price" => (float)$row['precio_base'],
             "image" => $imagenes[0] ?? '',
             "description" => $row['descripcion'],
-            "category" => $row['categoria'] ?? 'Uncategorized',
+            "category" => $categoriesList[0] ?? 'Uncategorized', // Mantiene compatibilidad con scripts antiguos
+            "categories" => $categoriesList,                     // Arreglo con todas las categorías del producto
             "stock" => (int)$row['stock_total'],
             "featured" => (bool)$row['destacado'],
             "sizes" => $sizes,
