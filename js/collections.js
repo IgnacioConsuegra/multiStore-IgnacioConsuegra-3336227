@@ -105,6 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Filtra y ordena el arreglo de productos
+   // Filtra y ordena el arreglo de productos
     function applyFiltersAndSort() {
         const searchTerm = searchInput.value.toLowerCase().trim();
         const sortBy = sortSelect.value;
@@ -117,13 +118,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedMaterials = getCheckedValues('.material-check');
 
         let filtered = allProducts.filter(product => {
-            // 1. Filtro de búsqueda por texto (nombre, descripción o cualquiera de sus categorías)
+            // 1. Filtro de búsqueda por texto
             const matchesSearch = !searchTerm ||
                 product.name.toLowerCase().includes(searchTerm) ||
                 (product.description && product.description.toLowerCase().includes(searchTerm)) ||
                 (product.categories && product.categories.some(c => c.toLowerCase().includes(searchTerm)));
 
-            // 2. Filtro de categorías (soporta múltiples categorías por producto)
+            // 2. Filtro de categorías
             const matchesCategory = selectedCategories.length === 0 ||
                 (product.categories && product.categories.some(c => selectedCategories.includes(c)));
 
@@ -143,12 +144,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const price = Number(product.price);
             const matchesPrice = price >= minPrice && price <= maxPrice;
 
-            return matchesSearch && matchesCategory && matchesSize && matchesColor && matchesMaterial && matchesPrice;
+            // 7. Filtro de Sale (solo productos con descuento > 0 si está seleccionada la opción)
+            const matchesSale = sortBy !== 'sale' || Number(product.discount) > 0;
+
+            return matchesSearch && matchesCategory && matchesSize && matchesColor && matchesMaterial && matchesPrice && matchesSale;
         });
 
         // Ordenamiento
         filtered.sort((a, b) => {
             switch (sortBy) {
+                case 'sale':
+                    // Ordena de mayor a menor porcentaje de descuento
+                    return Number(b.discount) - Number(a.discount);
                 case 'price-low':
                     return Number(a.price) - Number(b.price);
                 case 'price-high':
