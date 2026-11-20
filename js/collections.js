@@ -1,167 +1,231 @@
-document.addEventListener('DOMContentLoaded', () => {
-    
-    let allProducts = [];
-    let filtrado = [];
-
-    const grid = document.getElementById('products-grid');
+document.addEventListener('DOMContentLoaded', async () => {
+    // Referencias del DOM
+    const productsGrid = document.getElementById('products-grid');
     const itemCount = document.getElementById('item-count');
     const searchInput = document.getElementById('search-input');
     const sortSelect = document.getElementById('sort-select');
-    const priceMin = document.getElementById('price-min');
-    const priceMax = document.getElementById('price-max');
-    
-    const categoryChecks = document.querySelectorAll('.category-check');
-    const sizeChecks = document.querySelectorAll('.size-check');
-    const colorChecks = document.querySelectorAll('.color-check');
-    const materialChecks = document.querySelectorAll('.material-check');
+    const priceMinInput = document.getElementById('price-min');
+    const priceMaxInput = document.getElementById('price-max');
 
-    function loadData() {
-        const localDB = JSON.parse(localStorage.getItem('currentProducts'));
-        
-        if (localDB && localDB.length > 0) {
-            allProducts = localDB;
-            applyFilters();
-        } else {
-            fetch('products.json')
-                .then(response => response.json())
-                .then(data => {
-                    allProducts = data;
-                    localStorage.setItem('currentProducts', JSON.stringify(data));
-                    applyFilters();
-                })
-                .catch(error => console.error("Error cargando productos:", error));
+    const categoryContainer = document.getElementById('filter-category');
+    const sizeContainer = document.getElementById('filter-size');
+    const colorContainer = document.getElementById('filter-color');
+    const materialContainer = document.getElementById('filter-material');
+
+    let allProducts = [];
+    let allCategories = [];
+
+    // 1. Leer parámetro ?category=... de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryFromUrl = urlParams.get('category');
+
+    // 2. Cargar productos y categorías desde el Backend PHP en paralelo
+    try {
+        const [productsRes, categoriesRes] = await Promise.all([
+            fetch('../backend/api/products.php'),
+            fetch('../backend/api/categories.php')
+        ]);
+
+        if (!productsRes.ok || !categoriesRes.ok) {
+            throw new Error('Error al consultar la API');
         }
+
+        allProducts = await productsRes.json();
+        allCategories = await categoriesRes.json();
+
+        // Sincronizar con localStorage para que el carrito siga funcionando
+        localStorage.setItem('currentProducts', JSON.stringify(allProducts));
+
+        // 3. Construir checkboxes dinámicos desde la BD
+        renderFilterOptions();
+
+        // 4. Si viene una categoría en la URL (y no es "All"), marcar su checkbox
+        if (categoryFromUrl && categoryFromUrl.toLowerCase() !== 'all') {
+            const checkboxes = document.querySelectorAll('.category-check');
+            checkboxes.forEach(cb => {
+                if (cb.value.toLowerCase() === categoryFromUrl.toLowerCase()) {
+                    cb.checked = true;
+                }
+            });
+        }
+
+        // 5. Aplicar filtros iniciales y renderizar
+        applyFiltersAndSort();
+
+    } catch (error) {
+        console.error('Error inicializando la colección:', error);
+        productsGrid.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <p class="text-danger">Error loading products from the database.</p>
+            </div>
+        `;
     }
 
-    function applyFilters() {
-        filtrado = [...allProducts]; 
+    // Genera los checkboxes de Categorías, Tallas, Colores y Materiales desde los datos reales
+    function renderFilterOptions() {
+        // Categorías (omitimos "All" porque desmarcar todo ya muestra todos los productos)
+        const validCategories = allCategories.filter(c => c.name.toLowerCase() !== 'all');
+        categoryContainer.innerHTML = validCategories.map(cat => `
+            <label class="custom-checkbox d-flex align-items-center gap-2">
+                <input type="checkbox" value="${cat.name}" class="filter-check category-check">
+                <span>${cat.name}</span>
+            </label>
+        `).join('');
 
+        // Extraer valores únicos de tallas, colores y materiales de los productos cargados
+        const uniqueSizes = [...new Set(allProducts.flatMap(p => p.sizes || []))];
+        const uniqueColors = [...new Set(allProducts.flatMap(p => p.colors || []))];
+        const uniqueMaterials = [...new Set(allProducts.flatMap(p => p.materials || []))];
+
+        sizeContainer.innerHTML = uniqueSizes.map(size => `
+            <label class="custom-checkbox d-flex align-items-center gap-2">
+                <input type="checkbox" value="${size}" class="filter-check size-check">
+                <span>${size}</span>
+            </label>
+        `).join('');
+
+        colorContainer.innerHTML = uniqueColors.map(color => `
+            <label class="custom-checkbox d-flex align-items-center gap-2">
+                <input type="checkbox" value="${color}" class="filter-check color-check">
+                <span>${color}</span>
+            </label>
+        `).join('');
+
+        materialContainer.innerHTML = uniqueMaterials.map(mat => `
+            <label class="custom-checkbox d-flex align-items-center gap-2">
+                <input type="checkbox" value="${mat}" class="filter-check material-check">
+                <span>${mat}</span>
+            </label>
+        `).join('');
+
+        // Escuchar cambios en todos los checkboxes recién creados
+        document.querySelectorAll('.filter-check').forEach(checkbox => {
+            checkbox.addEventListener('change', applyFiltersAndSort);
+        });
+    }
+
+    // Filtra y ordena el arreglo de productos
+    function applyFiltersAndSort() {
         const searchTerm = searchInput.value.toLowerCase().trim();
-        if (searchTerm) {
-            filtrado = filtrado.filter(p => 
-                p.name.toLowerCase().includes(searchTerm) ||
-                (p.description && p.description.toLowerCase().includes(searchTerm)) ||
-                (p.category && p.category.toLowerCase().includes(searchTerm))
-            );
-        }
+        const sortBy = sortSelect.value;
+        const minPrice = parseFloat(priceMinInput.value) || 0;
+        const maxPrice = priceMaxInput.value === '' ? Infinity : parseFloat(priceMaxInput.value);
 
-        const getCheckedValues = (nodeList) => Array.from(nodeList).filter(cb => cb.checked).map(cb => cb.value);
-        
-        const activeCategories = getCheckedValues(categoryChecks);
-        const activeSizes = getCheckedValues(sizeChecks);
-        const activeColors = getCheckedValues(colorChecks);
-        const activeMaterials = getCheckedValues(materialChecks);
+        const selectedCategories = getCheckedValues('.category-check');
+        const selectedSizes = getCheckedValues('.size-check');
+        const selectedColors = getCheckedValues('.color-check');
+        const selectedMaterials = getCheckedValues('.material-check');
 
-        if (activeCategories.length > 0) {
-            filtrado = filtrado.filter(p => activeCategories.includes(p.category));
-        }
+        let filtered = allProducts.filter(product => {
+            // 1. Filtro de búsqueda por texto (nombre, descripción o cualquiera de sus categorías)
+            const matchesSearch = !searchTerm ||
+                product.name.toLowerCase().includes(searchTerm) ||
+                (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+                (product.categories && product.categories.some(c => c.toLowerCase().includes(searchTerm)));
 
-        if (activeSizes.length > 0) {
-            filtrado = filtrado.filter(p => p.sizes && p.sizes.some(size => activeSizes.includes(size)));
-        }
+            // 2. Filtro de categorías (soporta múltiples categorías por producto)
+            const matchesCategory = selectedCategories.length === 0 ||
+                (product.categories && product.categories.some(c => selectedCategories.includes(c)));
 
-        if (activeColors.length > 0) {
-            filtrado = filtrado.filter(p => p.colors && p.colors.some(color => activeColors.includes(color)));
-        }
+            // 3. Filtro de tallas
+            const matchesSize = selectedSizes.length === 0 ||
+                (product.sizes && product.sizes.some(s => selectedSizes.includes(s)));
 
-        if (activeMaterials.length > 0) {
-            filtrado = filtrado.filter(p => p.materials && p.materials.some(material => activeMaterials.includes(material)));
-        }
+            // 4. Filtro de colores
+            const matchesColor = selectedColors.length === 0 ||
+                (product.colors && product.colors.some(c => selectedColors.includes(c)));
 
-        const minP = parseFloat(priceMin.value) || 0;
-        const maxP = parseFloat(priceMax.value) || Infinity;
-        filtrado = filtrado.filter(p => p.price >= minP && p.price <= maxP);
+            // 5. Filtro de materiales
+            const matchesMaterial = selectedMaterials.length === 0 ||
+                (product.materials && product.materials.some(m => selectedMaterials.includes(m)));
 
-        const sortValue = sortSelect.value;
-        if (sortValue === 'price-low') {
-            filtrado.sort((a, b) => a.price - b.price);
-        } else if (sortValue === 'price-high') {
-            filtrado.sort((a, b) => b.price - a.price);
-        } else if (sortValue === 'name') {
-            filtrado.sort((a, b) => a.name.localeCompare(b.name));
-        } else if (sortValue === 'rating') {
-            filtrado.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-        }
+            // 6. Filtro de rango de precio
+            const price = Number(product.price);
+            const matchesPrice = price >= minPrice && price <= maxPrice;
 
-        renderProducts(filtrado);
+            return matchesSearch && matchesCategory && matchesSize && matchesColor && matchesMaterial && matchesPrice;
+        });
+
+        // Ordenamiento
+        filtered.sort((a, b) => {
+            switch (sortBy) {
+                case 'price-low':
+                    return Number(a.price) - Number(b.price);
+                case 'price-high':
+                    return Number(b.price) - Number(a.price);
+                case 'name':
+                    return a.name.localeCompare(b.name);
+                case 'rating':
+                    return (b.rating || 5) - (a.rating || 5);
+                case 'featured':
+                default:
+                    return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+            }
+        });
+
+        renderProducts(filtered);
     }
 
-    function renderProducts(productsToRender) {
-        grid.innerHTML = '';
-        itemCount.textContent = productsToRender.length;
+    function getCheckedValues(selector) {
+        return Array.from(document.querySelectorAll(`${selector}:checked`)).map(cb => cb.value);
+    }
 
-        if (productsToRender.length === 0) {
-            grid.innerHTML = `
+    // Renderiza las tarjetas de productos en el grid
+    function renderProducts(products) {
+        itemCount.textContent = products.length;
+        productsGrid.innerHTML = '';
+
+        if (products.length === 0) {
+            productsGrid.innerHTML = `
                 <div class="col-12 text-center py-5">
-                    <i class="fa-solid fa-box-open fs-1 text-muted opacity-25 mb-3"></i>
-                    <h3 class="font-heading fw-bold text-dark-custom">No products found</h3>
-                    <p class="text-muted-custom">Try adjusting your filters or search term.</p>
+                    <h4 class="font-heading text-muted-custom">No pieces found matching your criteria.</h4>
+                    <p class="text-muted-custom">Try adjusting your filters or search terms.</p>
                 </div>
             `;
             return;
         }
 
-        productsToRender.forEach((product, index) => {
-            const delay = (index % 12) * 50; 
-            
-            const stockBadge = product.stock <= 0 
-                ? `<span class="position-absolute top-0 start-0 m-3 badge bg-danger rounded-1">Out of Stock</span>`
+        products.forEach((product, index) => {
+            const delay = (index % 4) * 100;
+            const isOutOfStock = product.stock <= 0;
+            const categoriesLabel = (product.categories || []).join(' • ');
+
+            const stockBadge = isOutOfStock
+                ? `<span class="badge bg-secondary position-absolute top-0 start-0 m-3">Out of Stock</span>`
                 : '';
 
             const card = `
-                <div class="col-12 col-sm-6 col-lg-3" style="animation: fadeIn 0.4s ease-out ${delay}ms forwards; opacity: 0;">
-                    <div class="card h-100 border-0 rounded-1 shadow-sm overflow-hidden product-card-hover">
-                        <a href="./productDetails.html?id=${product.id}" class="text-decoration-none d-block position-relative">
-                            ${stockBadge}
-                            <div class="bg-light" style="height: 300px;">
-                                <img src="${product.image}" alt="${product.name}" class="w-100 h-100 object-fit-cover">
+                <div class="col-12 col-sm-6 col-lg-3 animate-slide-up" style="animation-delay: ${delay}ms;">
+                    <div class="product-card position-relative">
+                        ${stockBadge}
+                        <a href="productDetails.html?id=${product.id}" class="text-decoration-none d-block">
+                            <div class="product-img-wrapper">
+                                <img src="${product.image}" alt="${product.name}">
                             </div>
                         </a>
-                        <div class="card-body d-flex flex-column justify-content-between p-3">
+                        <div class="product-info">
                             <div>
-                                <p class="text-muted small mb-1">${product.category || 'Product'}</p>
-                                <a href="./productDetails.html?id=${product.id}" class="text-decoration-none">
-                                    <h3 class="font-heading fs-6 fw-bold text-dark-custom mb-2 text-truncate">${product.name}</h3>
-                                </a>
+                                <small class="text-muted d-block mb-1" style="font-size: 0.75rem;">${categoriesLabel}</small>
+                                <h3 class="font-heading product-title">${product.name}</h3>
+                                <p class="product-price">$${Number(product.price).toFixed(2)}</p>
                             </div>
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <p class="fw-medium text-dark-custom mb-0">$${product.price.toFixed(2)}</p>
-                                <button class="btn btn-sm btn-outline-dark rounded-1" onclick="window.location.href='./productDetails.html?id=${product.id}'">
-                                    View Details
-                                </button>
-                            </div>
+                            <button class="cart-btn" 
+                                    onclick="addToCart('${product.id}')" 
+                                    ${isOutOfStock ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}
+                                    aria-label="Add to cart">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
-            grid.innerHTML += card;
+            productsGrid.innerHTML += card;
         });
     }
 
-    searchInput.addEventListener('input', applyFilters);
-    sortSelect.addEventListener('change', applyFilters);
-    priceMin.addEventListener('input', applyFilters);
-    priceMax.addEventListener('input', applyFilters);
-
-    document.querySelectorAll('.filter-check').forEach(checkbox => {
-        checkbox.addEventListener('change', applyFilters);
-    });
-
-    // Añadir estilo CSS de animación dinámicamente si no existe
-    if (!document.getElementById('collections-animations')) {
-        const style = document.createElement('style');
-        style.id = 'collections-animations';
-        style.innerHTML = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(10px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            .product-card-hover { transition: transform 0.2s, box-shadow 0.2s; }
-            .product-card-hover:hover { transform: translateY(-4px); box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important; }
-        `;
-        document.head.appendChild(style);
-    }
-
-    // Inicializar
-    loadData();
+    // Eventos para barra de búsqueda, ordenamiento y precios
+    searchInput.addEventListener('input', applyFiltersAndSort);
+    sortSelect.addEventListener('change', applyFiltersAndSort);
+    priceMinInput.addEventListener('input', applyFiltersAndSort);
+    priceMaxInput.addEventListener('input', applyFiltersAndSort);
 });
