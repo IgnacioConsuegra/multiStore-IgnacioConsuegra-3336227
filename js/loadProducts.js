@@ -2,11 +2,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('featured-products-grid');
     if (!grid) return;
 
-    const renderProductsFromStorage = () => {
-        const storedProducts = JSON.parse(localStorage.getItem('currentProducts')) || [];
+    const renderProducts = (products) => {
         grid.innerHTML = ''; 
         
-        storedProducts.slice(0, 4).forEach((product, index) => {
+        // Filtrar destacados si existen, o tomar los primeros 4
+        const featured = products.filter(p => p.featured);
+        const toRender = (featured.length > 0 ? featured : products).slice(0, 4);
+
+        toRender.forEach((product, index) => {
             const delay = index * 100;
             const card = `
                 <div class="col-12 col-sm-6 col-lg-3 animate-slide-up" style="animation-delay: ${delay}ms;">
@@ -19,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="product-info">
                             <div>
                                 <h3 class="font-heading product-title">${product.name}</h3>
-                                <p class="product-price">$${product.price.toFixed(2)}</p>
+                                <p class="product-price">$${Number(product.price).toFixed(2)}</p>
                             </div>
                             <button class="cart-btn" onclick="addToCart('${product.id}')" aria-label="Add to cart">
                                 <i class="fa-solid fa-cart-shopping"></i>
@@ -31,21 +34,24 @@ document.addEventListener('DOMContentLoaded', () => {
             grid.innerHTML += card;
         });
     };
-    if(localStorage.getItem('currentProducts')) {
-        renderProductsFromStorage();
-        return;
-    }
-    fetch('products.json')
-        .then(response => response.json())
+
+    // Fetch hacia la API en PHP (ruta relativa desde index.html)
+    fetch('backend/api/products.php')
+        .then(response => {
+            if (!response.ok) throw new Error('Error en la respuesta del servidor');
+            return response.json();
+        })
         .then(products => {
+            // Sincronizamos con localStorage para que addToCart siga encontrando el producto
             localStorage.setItem('currentProducts', JSON.stringify(products));
-            
-            renderProductsFromStorage();
+            renderProducts(products);
         })
         .catch(error => {
-            console.error('Error cargando los productos:', error);
-            if(localStorage.getItem('currentProducts')) {
-                renderProductsFromStorage();
+            console.error('Error cargando los productos desde la BD:', error);
+            // Respaldo con caché local si falla la red
+            const cachedProducts = JSON.parse(localStorage.getItem('currentProducts'));
+            if (cachedProducts) {
+                renderProducts(cachedProducts);
             }
         });
 });
