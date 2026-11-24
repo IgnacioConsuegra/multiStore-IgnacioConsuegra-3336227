@@ -6,7 +6,7 @@ class ProductController {
         $this->conn = $db;
     }
 
-    public function getAll() {
+public function getAll() {
         $query = "SELECT 
                     p.id_producto, 
                     p.nombre, 
@@ -16,7 +16,10 @@ class ProductController {
                     p.destacado, 
                     p.opciones,
                     GROUP_CONCAT(DISTINCT c.nombre SEPARATOR ',') AS categorias,
-                    COALESCE(MAX(c.porcentaje_descuento), 0) AS max_descuento,
+                    GREATEST(
+                        COALESCE(MAX(c.porcentaje_descuento), 0),
+                        COALESCE((SELECT porcentaje_descuento FROM categorias WHERE LOWER(nombre) = 'all' LIMIT 1), 0)
+                    ) AS max_descuento,
                     COALESCE((SELECT SUM(stock) FROM producto_variantes WHERE id_producto = p.id_producto), 0) AS stock_total
                   FROM productos p
                   LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
@@ -44,7 +47,10 @@ class ProductController {
                     p.destacado, 
                     p.opciones,
                     GROUP_CONCAT(DISTINCT c.nombre SEPARATOR ',') AS categorias,
-                    COALESCE(MAX(c.porcentaje_descuento), 0) AS max_descuento,
+                    GREATEST(
+                        COALESCE(MAX(c.porcentaje_descuento), 0),
+                        COALESCE((SELECT porcentaje_descuento FROM categorias WHERE LOWER(nombre) = 'all' LIMIT 1), 0)
+                    ) AS max_descuento,
                     COALESCE((SELECT SUM(stock) FROM producto_variantes WHERE id_producto = p.id_producto), 0) AS stock_total
                   FROM productos p
                   LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
@@ -70,7 +76,10 @@ class ProductController {
     private function formatProduct($row) {
         $imagenes = json_decode($row['imagenes_base'], true) ?: [];
         $opciones = json_decode($row['opciones'], true) ?: [];
-        $categoriesList = !empty($row['categorias']) ? explode(',', $row['categorias']) : [];
+        $rawCategories = !empty($row['categorias']) ? explode(',', $row['categorias']) : [];
+        $categoriesList = array_values(array_filter($rawCategories, function($cat) {
+            return strtolower(trim($cat)) !== 'all';
+        }));
 
         $sizes = [];
         $colors = [];

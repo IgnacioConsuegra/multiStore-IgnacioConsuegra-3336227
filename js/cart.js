@@ -1,247 +1,326 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
     const emptyState = document.getElementById('empty-cart-state');
     const populatedState = document.getElementById('populated-cart-state');
     const itemsContainer = document.getElementById('cart-items-container');
+
+    const subtotalEl = document.getElementById('summary-subtotal');
+    const shippingEl = document.getElementById('summary-shipping');
+    const shippingNoticeEl = document.getElementById('shipping-notice');
+    const totalEl = document.getElementById('summary-total');
     const checkoutBtn = document.getElementById('checkout-btn');
 
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const user = JSON.parse(localStorage.getItem('user')) || null;
+    const FREE_SHIPPING_THRESHOLD = 200;
+    const STANDARD_SHIPPING_COST = 15;
 
-    if (!user) {
-        checkoutBtn.textContent = 'Sign In to Checkout';
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+
+    // Si no hay sesión iniciada, mostrar estado vacío o redirigir al login
+    if (!currentUser || !currentUser.id) {
+        showEmptyState();
+        return;
     }
 
-    function syncCartWithCurrentProducts() {
-        let localProducts = JSON.parse(localStorage.getItem('currentProducts')) || [];
-        if (localProducts.length > 0 && cart.length > 0) {
-            cart.forEach(cartItem => {
-                const dbProduct = localProducts.find(p => p.id === cartItem.id);
-                if (dbProduct) {
-                    cartItem.stock = dbProduct.stock; 
-                    if (cartItem.quantity > cartItem.stock) {
-                        cartItem.quantity = cartItem.stock;
-                    }
-                }
-            });
-            
-            cart = cart.filter(item => item.quantity > 0);
-            localStorage.setItem('cart', JSON.stringify(cart));
+    let cartItems = [];
+
+    // 1. Cargar carrito desde MySQL
+    async function fetchCart() {
+        try {
+            const response = await fetch(`../backend/api/cart.php?userId=${encodeURIComponent(currentUser.id)}`);
+            if (!response.ok) throw new Error('Error al cargar el carrito');
+
+            cartItems = await response.json();
+            renderCart();
+        } catch (error) {
+            console.error('Error cargando carrito:', error);
+            showEmptyState();
         }
     }
 
-    function renderCart() {
-        syncCartWithCurrentProducts();
+    function showEmptyState() {
+        if (emptyState) emptyState.classList.remove('d-none');
+        if (populatedState) populatedState.classList.add('d-none');
+        updateNavbarBadge(0);
+    }
 
-        if (cart.length === 0) {
-            emptyState.classList.remove('d-none');
-            emptyState.classList.add('d-flex');
-            populatedState.classList.add('d-none');
+    function updateNavbarBadge(totalCount) {
+        const badges = document.querySelectorAll('.cart-badge, #cart-count');
+        badges.forEach(badge => {
+            badge.textContent = totalCount;
+            if (totalCount > 0) {
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+        });
+    }
+
+    // 2. Renderizar lista de productos y resumen
+  // 2. Renderizar lista de productos y resumen
+    function renderCart() {
+        if (!cartItems || cartItems.length === 0) {
+            showEmptyState();
             return;
         }
 
-        emptyState.classList.add('d-none');
-        emptyState.classList.remove('d-flex');
-        populatedState.classList.remove('d-none');
+        if (emptyState) emptyState.classList.add('d-none');
+        if (populatedState) populatedState.classList.remove('d-none');
 
         itemsContainer.innerHTML = '';
         let subtotal = 0;
+        let totalUnits = 0;
 
-        cart.forEach((item, index) => {
+        cartItems.forEach(item => {
+            const hasDiscount = item.discount > 0;
             const itemTotal = item.price * item.quantity;
+            const itemOriginalTotal = item.originalPrice * item.quantity;
+
             subtotal += itemTotal;
+            totalUnits += item.quantity;
 
-            let propertiesHtml = '';
-            if (item.selectedSize) propertiesHtml += `<span class="property-badge">Size: ${item.selectedSize}</span>`;
-            if (item.selectedColor) propertiesHtml += `<span class="property-badge">Color: ${item.selectedColor}</span>`;
-            if (item.selectedMaterial) propertiesHtml += `<span class="property-badge">Material: ${item.selectedMaterial}</span>`;
+            // Variantes seleccionadas
+            const variants = [];
+            if (item.selectedSize) variants.push(`Size: ${item.selectedSize}`);
+            if (item.selectedColor) variants.push(`Color: ${item.selectedColor}`);
+            if (item.selectedMaterial) variants.push(`Material: ${item.selectedMaterial}`);
+            const variantText = variants.join(' • ');
 
-            itemsContainer.innerHTML += `
-                <div class="cart-item-card p-4">
-                    <div class="d-flex gap-4">
-                        <div class="cart-item-img overflow-hidden flex-shrink-0">
-                            <img src="${item.image}" alt="${item.name}" class="w-100 h-100">
+            // Insignia roja sobre la imagen (igual a productDetails)
+            const discountBadgeHtml = hasDiscount
+                ? `<span class="badge bg-danger position-absolute top-0 end-0 m-1" style="font-size: 0.7rem;">-${item.discount}%</span>`
+                : '';
+
+            // Precio unitario (tachado + rojo si tiene descuento)
+            const unitPriceHtml = hasDiscount
+                ? `<p class="mb-0">
+                       <span class="text-muted text-decoration-line-through small me-2">$${Number(item.originalPrice).toFixed(2)}</span>
+                       <span class="text-danger fw-bold">$${Number(item.price).toFixed(2)}</span>
+                   </p>`
+                : `<p class="fw-medium text-dark-custom mb-0">$${Number(item.price).toFixed(2)}</p>`;
+
+            // Total de la fila (cantidad * precio)
+            const rowTotalHtml = hasDiscount
+                ? `<div class="text-end">
+                       <span class="text-muted text-decoration-line-through small me-2">$${itemOriginalTotal.toFixed(2)}</span>
+                       <span class="font-heading fw-bold text-danger fs-5">$${itemTotal.toFixed(2)}</span>
+                   </div>`
+                : `<span class="font-heading fw-bold text-dark-custom fs-5">$${itemTotal.toFixed(2)}</span>`;
+
+            const cardHtml = `
+                <div class="cart-item-card border custom-border-light rounded-1 p-3 p-md-4 bg-white d-flex flex-column flex-sm-row gap-4 align-items-sm-center">
+                    <a href="productDetails.html?id=${item.id}" class="position-relative flex-shrink-0 d-inline-block">
+                        ${discountBadgeHtml}
+                        <img src="${item.image}" alt="${item.name}" class="rounded-1 object-fit-cover" style="width: 100px; height: 120px;">
+                    </a>
+
+                    <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
+                            <div>
+                                <a href="productDetails.html?id=${item.id}" class="text-decoration-none">
+                                    <h3 class="font-heading fw-bold text-dark-custom fs-5 mb-1">${item.name}</h3>
+                                </a>
+                                ${variantText ? `<p class="text-muted-custom small mb-2">${variantText}</p>` : ''}
+                                ${unitPriceHtml}
+                            </div>
+
+                            <button class="btn btn-sm text-muted-custom p-1 remove-item-btn" data-item-id="${item.itemId}" aria-label="Remove item" title="Remove">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
                         </div>
-                        <div class="flex-grow-1 min-vw-0">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <a href="/product.html?id=${item.id}" class="font-heading fs-5 fw-semibold text-dark-custom text-decoration-none">${item.name}</a>
-                                    <p class="text-muted-custom small mt-1 mb-0">${item.category}</p>
-                                </div>
-                                <button class="btn-delete p-1" onclick="removeFromCart(${index})" aria-label="Remove item">
-                                    <i class="fa-solid fa-trash-can fs-5"></i>
+
+                        <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top custom-border-light">
+                            <div class="quantity-selector d-flex align-items-center">
+                                <button class="qty-btn btn-qty-minus" data-item-id="${item.itemId}" aria-label="Decrease quantity">
+                                    <i class="fa-solid fa-minus fs-7"></i>
+                                </button>
+                                <span class="qty-display fw-medium px-3">${item.quantity}</span>
+                                <button class="qty-btn btn-qty-plus" data-item-id="${item.itemId}" ${item.quantity >= item.stock ? 'disabled style="opacity:0.4;"' : ''} aria-label="Increase quantity">
+                                    <i class="fa-solid fa-plus fs-7"></i>
                                 </button>
                             </div>
-                            
-                            <div class="d-flex flex-wrap gap-2 mb-3">
-                                ${propertiesHtml}
-                            </div>
 
-                            <div class="d-flex justify-content-between align-items-end mt-auto">
-                                <div class="d-flex align-items-center gap-2">
-                                    <button class="qty-btn" onclick="updateQty(${index}, -1)">
-                                        <i class="fa-solid fa-minus" style="font-size: 0.6rem;"></i>
-                                    </button>
-                                    <span class="text-dark-custom fw-medium text-center" style="width: 2rem;">${item.quantity}</span>
-                                    <button class="qty-btn" onclick="updateQty(${index}, 1)" ${item.quantity >= item.stock ? 'disabled' : ''}>
-                                        <i class="fa-solid fa-plus" style="font-size: 0.6rem;"></i>
-                                    </button>
-                                </div>
-                                <div class="text-end">
-                                    <p class="font-heading fs-5 fw-bold text-dark-custom mb-0">$${itemTotal.toFixed(2)}</p>
-                                    <p class="text-muted-custom small mb-0">$${item.price.toFixed(2)} each</p>
-                                </div>
-                            </div>
+                            ${rowTotalHtml}
                         </div>
                     </div>
                 </div>
             `;
+            itemsContainer.innerHTML += cardHtml;
         });
 
-        const shipping = subtotal >= 200 ? 0 : 15.00;
-        const total = subtotal + shipping;
+        updateNavbarBadge(totalUnits);
+        updateSummary(subtotal);
+        attachItemEvents();
+    }
 
-        document.getElementById('summary-subtotal').textContent = `$${subtotal.toFixed(2)}`;
-        document.getElementById('summary-shipping').textContent = shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`;
-        document.getElementById('summary-total').textContent = `$${total.toFixed(2)}`;
+    // 3. Calcular Subtotal, Envío y Total
+    function updateSummary(subtotal) {
+        subtotalEl.textContent = `$${subtotal.toFixed(2)}`;
 
-        window.currentOrderTotals = { subtotal, shipping, total };
-
-        const shippingNotice = document.getElementById('shipping-notice');
-        if (subtotal < 200) {
-            shippingNotice.textContent = `Add $${(200 - subtotal).toFixed(2)} more for free shipping!`;
-            shippingNotice.classList.remove('d-none');
+        let shippingCost = 0;
+        if (subtotal >= FREE_SHIPPING_THRESHOLD) {
+            shippingEl.textContent = 'FREE';
+            shippingEl.classList.add('text-success');
+            if (shippingNoticeEl) shippingNoticeEl.classList.add('d-none');
         } else {
-            shippingNotice.classList.add('d-none');
-        }
-    }
-
-    window.removeFromCart = function(index) {
-        cart.splice(index, 1);
-        localStorage.setItem('cart', JSON.stringify(cart));
-        renderCart();
-        if(typeof initNavBar === 'function') initNavBar();
-    };
-
-    window.updateQty = function(index, change) {
-        const item = cart[index];
-        const newQty = item.quantity + change;
-        
-        if (newQty >= 1 && newQty <= item.stock) {
-            item.quantity = newQty;
-            localStorage.setItem('cart', JSON.stringify(cart));
-            renderCart();
-        }
-    };
-
-    function showSuccessOverlay() {
-        const overlay = document.createElement('div');
-        overlay.id = "success-overlay";
-        overlay.style.position = 'fixed';
-        overlay.style.top = '0';
-        overlay.style.left = '0';
-        overlay.style.width = '100vw';
-        overlay.style.height = '100vh';
-        overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
-        overlay.style.backdropFilter = 'blur(4px)';
-        overlay.style.zIndex = '9999';
-        overlay.style.display = 'flex';
-        overlay.style.alignItems = 'center';
-        overlay.style.justifyContent = 'center';
-        
-        overlay.innerHTML = `
-            <div style="background-color: var(--paper, #fff); padding: 3rem; border-radius: 4px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: slideUp 0.4s ease-out;">
-                <div style="width: 64px; height: 64px; background-color: #2e7d32; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
-                    <i class="fa-solid fa-check" style="font-size: 2rem;"></i>
-                </div>
-                <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: bold; color: var(--text-dark, #1a1a1a); margin-bottom: 1rem;">Order Confirmed!</h2>
-                <p style="color: #6c757d; margin-bottom: 1.5rem; line-height: 1.5;">Thank you for your purchase. Your order has been placed successfully.</p>
-                <p style="font-size: 0.875rem; color: #999;">Redirecting to your profile in <span id="redirect-countdown" style="font-weight: bold; color: var(--btn-color, #3f523e);">5</span> seconds...</p>
-            </div>
-        `;
-        
-        document.body.appendChild(overlay);
-
-        let timeLeft = 5;
-        const countdownSpan = document.getElementById('redirect-countdown');
-        const interval = setInterval(() => {
-            timeLeft--;
-            if(countdownSpan) countdownSpan.textContent = timeLeft;
-            if(timeLeft <= 0) clearInterval(interval);
-        }, 1000);
-    }
-
-    checkoutBtn.addEventListener('click', async () => {
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
-
-        checkoutBtn.disabled = true;
-        checkoutBtn.textContent = 'Processing Order...';
-
-        try {
-            let localDB = JSON.parse(localStorage.getItem('currentProducts'));
-            if (!localDB) {
-                const response = await fetch('products.json');
-                localDB = await response.json();
+            shippingCost = STANDARD_SHIPPING_COST;
+            shippingEl.textContent = `$${shippingCost.toFixed(2)}`;
+            shippingEl.classList.remove('text-success');
+            if (shippingNoticeEl) {
+                const remaining = (FREE_SHIPPING_THRESHOLD - subtotal).toFixed(2);
+                shippingNoticeEl.textContent = `Add $${remaining} more for FREE shipping!`;
+                shippingNoticeEl.classList.remove('d-none');
             }
+        }
 
-            cart.forEach(cartItem => {
-                const dbIndex = localDB.findIndex(p => p.id === cartItem.id);
-                if (dbIndex > -1) {
-                    localDB[dbIndex].stock -= cartItem.quantity;
-                    if(localDB[dbIndex].stock < 0) localDB[dbIndex].stock = 0; 
+        const total = subtotal + shippingCost;
+        totalEl.textContent = `$${total.toFixed(2)}`;
+    }
+
+    // 4. Eventos para +, - y Eliminar
+    function attachItemEvents() {
+        document.querySelectorAll('.btn-qty-minus').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const itemId = parseInt(btn.dataset.itemId);
+                const item = cartItems.find(i => i.itemId === itemId);
+                if (!item) return;
+
+                if (item.quantity > 1) {
+                    updateItemQuantity(itemId, item.quantity - 1);
+                } else {
+                    deleteCartItem(itemId);
                 }
             });
-            localStorage.setItem('currentProducts', JSON.stringify(localDB));
+        });
 
-            const now = new Date();
-            const month = now.getMonth() + 1; 
-            const day = now.getDate();
-            const year = now.getFullYear();
-            const hours = now.getHours().toString().padStart(2, '0');
-            const minutes = now.getMinutes().toString().padStart(2, '0');
-            const formattedDate = `${month}/${day}/${year} ${hours}:${minutes}`;
+        document.querySelectorAll('.btn-qty-plus').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const itemId = parseInt(btn.dataset.itemId);
+                const item = cartItems.find(i => i.itemId === itemId);
+                if (!item || item.quantity >= item.stock) return;
 
-            const newOrder = {
-                orderId: 'ORD-' + Date.now() + '-' + Math.floor(Math.random() * 1000), 
-                date: formattedDate,
-                user: {
-                    id: user.id || null,
-                    name: user.name,
-                    email: user.email
-                },
-                items: [...cart],
-                totals: window.currentOrderTotals, 
-                status: 'Pending'
-            };
+                updateItemQuantity(itemId, item.quantity + 1);
+            });
+        });
 
-            let orders = JSON.parse(localStorage.getItem('orders')) || [];
-            orders.push(newOrder);
-            localStorage.setItem('orders', JSON.stringify(orders));
+        document.querySelectorAll('.remove-item-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const itemId = parseInt(btn.dataset.itemId);
+                deleteCartItem(itemId);
+            });
+        });
+    }
 
-            setTimeout(() => {
-                localStorage.removeItem('cart');
-                cart = [];
-                
-                if(typeof initNavBar === 'function') initNavBar(); 
+    async function updateItemQuantity(itemId, newQuantity) {
+        try {
+            const response = await fetch('../backend/api/cart.php', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemId, quantity: newQuantity })
+            });
 
-                showSuccessOverlay();
-                
-                setTimeout(() => {
-                    window.location.href = 'profile.html';
-                }, 5000);
-
-            }, 800);
-
+            if (response.ok) {
+                await fetchCart();
+            }
         } catch (error) {
-            console.error("Error processing checkout:", error);
-            alert("There was an issue processing your order.");
-            checkoutBtn.disabled = false;
-            checkoutBtn.textContent = 'Proceed to Checkout';
+            console.error('Error actualizando cantidad:', error);
         }
-    });
+    }
 
-    renderCart();
+    async function deleteCartItem(itemId) {
+        try {
+            const response = await fetch(`../backend/api/cart.php?itemId=${itemId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                await fetchCart();
+            }
+        } catch (error) {
+            console.error('Error eliminando producto:', error);
+        }
+    }
+
+    // 5. Botón Proceed to Checkout
+// 5. Botón Proceed to Checkout (con modal de procesamiento de 3 segundos)
+    if (checkoutBtn) {
+        checkoutBtn.addEventListener('click', async () => {
+            if (!currentUser || !currentUser.id || cartItems.length === 0) return;
+
+            checkoutBtn.disabled = true;
+
+            // Crear cuadro modal superpuesto dinámicamente
+            const overlay = document.createElement('div');
+            overlay.id = 'payment-overlay';
+            overlay.style.cssText = `
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.55);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            `;
+
+            const modalBox = document.createElement('div');
+            modalBox.className = 'bg-white rounded-1 p-5 text-center shadow-lg border custom-border-light';
+            modalBox.style.cssText = 'max-width: 400px; width: 90%;';
+            modalBox.innerHTML = `
+                <div class="spinner-border text-dark mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+                <h4 class="font-heading fw-bold text-dark-custom mb-2">El pago se está procesando...</h4>
+                <p class="text-muted-custom small mb-0">Por favor no cierres esta ventana.</p>
+            `;
+
+            overlay.appendChild(modalBox);
+            document.body.appendChild(overlay);
+
+            // Promesa de espera mínima de 3 segundos
+            const delay3Seconds = new Promise(resolve => setTimeout(resolve, 3000));
+
+            try {
+                // Ejecutar la petición al servidor y la espera de 3 segundos en paralelo
+                const [response] = await Promise.all([
+                    fetch('../backend/api/checkout.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId: currentUser.id })
+                    }),
+                    delay3Seconds
+                ]);
+
+                const result = await response.json();
+
+                if (response.ok && result.status === 'success') {
+                    // Mostrar confirmación de éxito
+                    modalBox.innerHTML = `
+                        <div class="text-success mb-3">
+                            <i class="fa-solid fa-circle-check" style="font-size: 3.5rem;"></i>
+                        </div>
+                        <h4 class="font-heading fw-bold text-dark-custom mb-2">¡El pago se agendó correctamente!</h4>
+                        <p class="text-muted-custom small mb-0">Orden #${result.orderId} generada con éxito.</p>
+                    `;
+
+                    // Limpiar el carrito en memoria y actualizar la vista
+                    cartItems = [];
+                    renderCart();
+
+                    // Cerrar el cuadro después de 2 segundos
+                    setTimeout(() => {
+                        overlay.remove();
+                        checkoutBtn.disabled = false;
+                    }, 2000);
+                } else {
+                    overlay.remove();
+                    checkoutBtn.disabled = false;
+                    alert(result.message || 'No se pudo procesar el pago.');
+                }
+            } catch (error) {
+                console.error('Error en checkout:', error);
+                overlay.remove();
+                checkoutBtn.disabled = false;
+                alert('Error de conexión con el servidor al procesar el pago.');
+            }
+        });
+    }
+
+    // Iniciar carga
+    fetchCart();
 });

@@ -22,109 +22,108 @@
 <body>
     <div id="navbar-container"></div>
 
-    <main class="product-page py-5">
-        <div class="container py-4">
+  <main class="product-page py-5">
+    <div class="container py-4">
 
-            <!-- Back Button -->
-            <a href="/views/collections.html"
-                class="back-link d-inline-flex align-items-center gap-2 mb-5 text-decoration-none">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Back to Shop</span>
-            </a>
+        <!-- Back Button -->
+        <a href="collections.html"
+            class="back-link d-inline-flex align-items-center gap-2 mb-5 text-decoration-none">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Back to Shop</span>
+        </a>
 
-            <div class="row g-5">
+        <div class="row g-5">
 
-                <!-- Product Image -->
-                <div class="col-12 col-lg-6">
-                    <div class="product-image-container border custom-border-light rounded-1 overflow-hidden bg-white">
-                        <img id="prod-img" src="" alt="" class="w-100 h-100 object-fit-cover">
-                    </div>
+            <!-- Product Image -->
+            <div class="col-12 col-lg-6">
+                <div class="product-image-container position-relative border custom-border-light rounded-1 overflow-hidden bg-white">
+                    <span id="prod-discount-badge" class="badge bg-danger position-absolute top-0 end-0 m-3 fs-6 d-none z-2"></span>
+                    <img id="prod-img" src="" alt="" class="w-100 h-100 object-fit-cover">
                 </div>
-
-                <!-- Product Info -->
-                <div class="col-12 col-lg-6">
-                    <div class="d-flex flex-column gap-4">
-
-                        <!-- Header -->
-                        <div>
-                            <h1 id="prod-name" class="font-heading fw-bold text-dark-custom mb-3 display-5"></h1>
-                            <p id="prod-price" class="font-heading fw-bold text-dark-custom display-6 mb-0"></p>
-                        </div>
-
-                        <!-- Description Divider -->
-                        <div class="border-top custom-border-light pt-4">
-                            <p id="prod-desc" class="text-muted-custom fs-6 mb-0"></p>
-                        </div>
-
-                        <!-- Properties -->
-                        <div id="prod-properties" class="properties-section d-flex flex-column gap-4 mt-2">
-                        </div>
-
-
-                        <!-- Quantity -->
-                        <div class="mt-2">
-                            <h3 class="property-label text-capitalize fw-bold mb-3 fs-6">Quantity</h3>
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="quantity-selector d-flex align-items-center">
-                                    <button class="qty-btn" id="btn-minus" aria-label="Decrease quantity">
-                                        <i class="fa-solid fa-minus fs-7"></i>
-                                    </button>
-                                    <span class="qty-display fw-medium" id="qty-value">1</span>
-                                    <button class="qty-btn" id="btn-plus" aria-label="Increase quantity">
-                                        <i class="fa-solid fa-plus fs-7"></i>
-                                    </button>
-                                </div>
-                                <span id="prod-stock" class="text-muted-custom small"></span>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="d-flex gap-3 mt-2">
-                            <button
-                                class=" btn-add-cart flex-grow-1 d-flex justify-content-center align-items-center gap-2">
-                                <i class="fa-solid fa-cart-shopping"></i> Add to Cart
-                            </button>
-                            <button class="btn btn-wishlist d-flex justify-content-center align-items-center"
-                                aria-label="Add to wishlist">
-                                <i class="fa-regular fa-heart"></i>
-                            </button>
-                        </div>
-
-                        <!-- Success Message -->
-                        <div id="success-msg" class="success-message d-none mt-2">
-                            <i class="fa-solid fa-check me-2"></i> Added to cart successfully!
-                        </div>
-
-                        <!-- Features -->
-                        <div class="row g-4 pt-4 mt-2 border-top custom-border-light">
-                            <div class="col-6 d-flex align-items-center gap-3">
-                                <div
-                                    class="feature-icon-wrapper rounded-circle d-flex justify-content-center align-items-center">
-                                    <i class="fa-solid fa-truck"></i>
-                                </div>
-                                <div>
-                                    <p class="fw-medium text-dark-custom mb-0 fs-6">Free Shipping</p>
-                                    <p class="text-muted-custom small mb-0">Orders over $200</p>
-                                </div>
-                            </div>
-                            <div class="col-6 d-flex align-items-center gap-3">
-                                <div
-                                    class="feature-icon-wrapper rounded-circle d-flex justify-content-center align-items-center">
-                                    <i class="fa-solid fa-shield-halved"></i>
-                                </div>
-                                <div>
-                                    <p class="fw-medium text-dark-custom mb-0 fs-6">Secure Payment</p>
-                                    <p class="text-muted-custom small mb-0">100% protected</p>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-
             </div>
+
+            <!-- Product Info -->
+            <div class="col-12 col-lg-6">
+                <div class="d-flex flex-column gap-4">
+
+                    <!-- Header -->
+                    <div>
+                        <h1 id="prod-name" class="font-heading fw-bold text-dark-custom mb-3 display-5"></h1>
+                        <p id="prod-price" class="font-heading fw-bold text-dark-custom display-6 mb-0"></p>
+                    </div>
+
+                    <!-- Description Divider & Collections -->
+                    <div class="border-top custom-border-light pt-4">
+                        <p id="prod-desc" class="text-muted-custom fs-6 mb-0"></p>
+                        <!-- Botones pequeños en gris con las colecciones -->
+                        <div id="prod-categories" class="d-flex flex-wrap gap-2 mt-3"></div>
+                    </div>
+
+                    <!-- Properties -->
+                    <div id="prod-properties" class="properties-section d-flex flex-column gap-4 mt-2">
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="mt-2">
+                        <h3 class="property-label text-capitalize fw-bold mb-3 fs-6">Quantity</h3>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="quantity-selector d-flex align-items-center">
+                                <button class="qty-btn" id="btn-minus" aria-label="Decrease quantity">
+                                    <i class="fa-solid fa-minus fs-7"></i>
+                                </button>
+                                <span class="qty-display fw-medium" id="qty-value">1</span>
+                                <button class="qty-btn" id="btn-plus" aria-label="Increase quantity">
+                                    <i class="fa-solid fa-plus fs-7"></i>
+                                </button>
+                            </div>
+                            <span id="prod-stock" class="text-muted-custom small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-3 mt-2">
+                        <button class="btn-add-cart flex-grow-1 d-flex justify-content-center align-items-center gap-2">
+                            <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                        </button>
+                        <button class="btn btn-wishlist d-flex justify-content-center align-items-center"
+                            aria-label="Add to wishlist">
+                            <i class="fa-regular fa-heart"></i>
+                        </button>
+                    </div>
+
+                    <!-- Success Message -->
+                    <div id="success-msg" class="success-message d-none mt-2">
+                        <i class="fa-solid fa-check me-2"></i> Added to cart successfully!
+                    </div>
+
+                    <!-- Features -->
+                    <div class="row g-4 pt-4 mt-2 border-top custom-border-light">
+                        <div class="col-6 d-flex align-items-center gap-3">
+                            <div class="feature-icon-wrapper rounded-circle d-flex justify-content-center align-items-center">
+                                <i class="fa-solid fa-truck"></i>
+                            </div>
+                            <div>
+                                <p class="fw-medium text-dark-custom mb-0 fs-6">Free Shipping</p>
+                                <p class="text-muted-custom small mb-0">Orders over $200</p>
+                            </div>
+                        </div>
+                        <div class="col-6 d-flex align-items-center gap-3">
+                            <div class="feature-icon-wrapper rounded-circle d-flex justify-content-center align-items-center">
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </div>
+                            <div>
+                                <p class="fw-medium text-dark-custom mb-0 fs-6">Secure Payment</p>
+                                <p class="text-muted-custom small mb-0">100% protected</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
-    </main>
+    </div>
+</main>
     <div id="footer-container"></div>
 
     <!-- JS de Bootstrap -->
