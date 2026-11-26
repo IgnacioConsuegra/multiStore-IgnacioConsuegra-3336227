@@ -199,10 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                             <div>
                                 <div class="d-flex align-items-center gap-3 mb-1">
-                                    <h3 class="font-heading fs-5 fw-semibold text-dark-custom mb-0">Order #${order.orderId}</h3>
+                                    <h3 class="font-heading fs-5 fw-semibold text-dark-custom mb-0">${dateString}</h3>
                                     <span class="status-badge ${getStatusClass(order.status)}">${order.status}</span>
                                 </div>
-                                <p class="text-muted-custom small mb-0">${dateString}</p>
                             </div>
                             <div class="text-md-end">
                                 <p class="font-heading fs-4 fw-bold text-dark-custom mb-0">$${Number(order.total).toFixed(2)}</p>

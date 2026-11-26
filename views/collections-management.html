@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collections Management - Academia</title>
+    
+    <link href="../vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../vendor/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../css/products-management.css">
+</head>
+<body>
+    <!-- Navbar Container -->
+    <div id="navbar-container"></div>
+
+    <main class="management-wrapper py-5">
+        <div class="container">
+            <div id="adminManagement"></div>
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <h2 class="font-heading fw-bold text-dark-custom mb-0 fs-4">Collections Management</h2>
+                <button id="toggle-form-btn" type="button" class="btn-custom px-4 py-2 d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add Collection
+                </button>
+            </div>
+
+            <!-- Form Section (hidden by default) -->
+            <div id="collection-form-section" class="bg-paper p-4 p-md-5 rounded-1 border custom-border-light shadow-sm mb-5 d-none animate-slide-down">
+                <h3 class="font-heading fs-4 fw-bold text-dark-custom border-bottom custom-border-light pb-3 mb-4" id="form-title">Create New Collection</h3>
+                
+                <form id="collection-form">
+                    <input type="hidden" id="collection-id">
+                    
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-dark-custom fw-medium small mb-1">Collection Name</label>
+                            <input type="text" id="col-name" class="form-control simple-input" placeholder="e.g. Literature, Outerwear" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-dark-custom fw-medium small mb-1">
+                                Discount Percentage (%) <span class="text-muted fw-normal">(Use dot <strong>.</strong> for decimals, 0 if none)</span>
+                            </label>
+                            <input type="text" inputmode="decimal" id="col-discount" class="form-control simple-input" placeholder="e.g. 15.00" value="0.00">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-dark-custom fw-medium small mb-1">Description</label>
+                        <textarea id="col-desc" class="form-control simple-input" rows="3" placeholder="Brief description of this collection..."></textarea>
+                    </div>
+
+                    <div class="row g-4 mb-4">
+                        <!-- Photo URL + Live Preview -->
+                        <div class="col-md-6">
+                            <label class="form-label text-dark-custom fw-medium small mb-1">
+                                Collection Photo URL <span class="text-muted fw-normal">(Optional)</span>
+                            </label>
+                            <input type="url" id="col-image" class="form-control simple-input" placeholder="https://...">
+                            <div id="col-image-preview-wrapper" class="mt-2 d-none">
+                                <img id="col-image-preview" src="" alt="Collection preview" class="rounded-1 border custom-border-light" style="width: 72px; height: 72px; object-fit: cover;">
+                            </div>
+                        </div>
+
+                        <!-- FontAwesome Icon + Quick Selector + Live Preview -->
+                        <div class="col-md-6">
+                            <label class="form-label text-dark-custom fw-medium small mb-1">
+                                Icon Class (FontAwesome)
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border custom-border-light text-dark-custom px-3" id="icon-preview-box">
+                                    <i id="col-icon-preview" class="fa-solid fa-layer-group"></i>
+                                </span>
+                                <input type="text" id="col-icon" class="form-control simple-input" value="fa-solid fa-layer-group" placeholder="fa-solid fa-layer-group">
+                            </div>
+                            <!-- Quick Icon Presets -->
+                            <div class="d-flex flex-wrap gap-2 mt-2" id="icon-presets">
+                                <button type="button" class="btn btn-sm btn-outline-secondary icon-preset-btn" data-icon="fa-solid fa-layer-group" title="Default Layers"><i class="fa-solid fa-layer-group"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary icon-preset-btn" data-icon="fa-solid fa-book-open" title="Literature"><i class="fa-solid fa-book-open"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary icon-preset-btn" data-icon="fa-solid fa-glasses" title="Accessories"><i class="fa-solid fa-glasses"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary icon-preset-btn" data-icon="fa-solid fa-pen-nib" title="Stationery"><i class="fa-solid fa-pen-nib"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary icon-preset-btn" data-icon="fa-solid fa-shirt" title="Outerwear"><i class="fa-solid fa-shirt"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary icon-preset-btn" data-icon="fa-solid fa-briefcase" title="Leather Goods"><i class="fa-solid fa-briefcase"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary icon-preset-btn" data-icon="fa-solid fa-gem" title="Jewelry"><i class="fa-solid fa-gem"></i></button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary icon-preset-btn" data-icon="fa-solid fa-clock" title="Watches"><i class="fa-solid fa-clock"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3 border-top custom-border-light pt-4">
+                        <button type="button" id="cancel-form-btn" class="btn-outline-custom px-4 py-2">Cancel</button>
+                        <button type="submit" id="save-collection-btn" class="btn-custom px-5 py-2">Save Collection</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Collections Table -->
+            <div class="bg-paper rounded-1 border custom-border-light overflow-hidden shadow-sm">
+                <div class="table-responsive">
+                    <table class="table custom-table mb-0 align-middle">
+                        <thead class="bg-light-custom">
+                            <tr>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Collection</th>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Icon</th>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Description</th>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Products</th>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Discount</th>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="collections-tbody" class="border-top-0">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </main>
+    <div id="footer-container"></div>
+
+    <script src="../vendor/bootstrap.bundle.min.js"></script>
+    <script src="../js/collections-management.js"></script>
+    <script src="../js/fetchNavBar.js"></script>
+    <script src="../js/fetchAdminNav.js"></script>
+    <script src="../js/navbar.js"></script>
+</body>
+</html>

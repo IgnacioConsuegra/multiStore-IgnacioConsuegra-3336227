@@ -25,7 +25,7 @@ class OrderController {
                 return;
             }
 
-            // 2. Obtener el carrito activo y sus ítems con los precios y descuentos vigentes
+            // 2. Obtener el carrito activo y sus ítems
             $cartQuery = "SELECT 
                             c.id_carrito,
                             ci.id_carrito_item,
@@ -70,7 +70,6 @@ class OrderController {
                 $prodId = (int)$item['id_producto'];
                 $qty = (int)$item['cantidad'];
 
-                // Verificar stock total disponible del producto
                 $stockStmt = $this->conn->prepare("SELECT COALESCE(SUM(stock), 0) AS total_stock FROM producto_variantes WHERE id_producto = :pid FOR UPDATE");
                 $stockStmt->bindParam(':pid', $prodId, PDO::PARAM_INT);
                 $stockStmt->execute();
@@ -102,7 +101,6 @@ class OrderController {
                 ];
             }
 
-            // Envío gratis a partir de $200, si no $15
             $shippingCost = $subtotal >= 200 ? 0 : 15;
             $montoTotal = round($subtotal + $shippingCost, 2);
 
@@ -123,7 +121,7 @@ class OrderController {
 
             $orderId = (int)$this->conn->lastInsertId();
 
-            // 5. Insertar ítems de la orden y descontar stock de producto_variantes
+            // 5. Insertar ítems de la orden y descontar stock
             $insertOrderItem = $this->conn->prepare("INSERT INTO ordenes_items 
                 (id_orden, id_producto, id_variante, cantidad, precio, atributos, imagen) 
                 VALUES (:oid, :pid, :vid, :qty, :price, :attrs, :img)");
@@ -139,7 +137,6 @@ class OrderController {
                     ':img' => $pItem['imagen']
                 ]);
 
-                // Descontar stock y sumar vendidos en las variantes del producto
                 $remainingToDeduct = $pItem['cantidad'];
                 $varsStmt = $this->conn->prepare("SELECT id_variante, stock FROM producto_variantes WHERE id_producto = :pid AND stock > 0 ORDER BY id_variante ASC");
                 $varsStmt->execute([':pid' => $pItem['id_producto']]);
@@ -159,7 +156,7 @@ class OrderController {
                 }
             }
 
-            // 6. Registrar la orden y ganancias en la tabla 'analiticas' (periodo actual MM-YYYY)
+            // 6. Registrar en analíticas
             $periodoActual = date('m-Y');
             $analyticsQuery = "INSERT INTO analiticas (periodo, ganancias_mes, ordenes_mes, historial_6m) 
                                VALUES (:periodo, :ganancias, 1, '[]') 
@@ -172,7 +169,7 @@ class OrderController {
                 ':ganancias' => $montoTotal
             ]);
 
-            // 7. Limpiar carrito_items y marcar el carrito como convertido
+            // 7. Limpiar carrito
             $delItems = $this->conn->prepare("DELETE FROM carrito_items WHERE id_carrito = :cid");
             $delItems->execute([':cid' => $cartId]);
 
@@ -263,6 +260,204 @@ class OrderController {
 
         http_response_code(200);
         echo json_encode($orders);
+    }
+
+    // Obtener todas las órdenes para el panel de administración
+    public function getAllOrders() {
+        $query = "SELECT 
+                    o.id_orden,
+                    o.id_usuario,
+                    o.monto_total,
+                    o.estado,
+                    o.envio_calle,
+                    o.envio_ciudad,
+                    o.envio_estado,
+                    o.envio_cp,
+                    o.envio_pais,
+                    o.creado_en,
+                    u.nombre AS usuario_nombre,
+                    u.email AS usuario_email,
+                    u.telefono AS usuario_telefono,
+                    u.calle AS usuario_calle,
+                    u.ciudad AS usuario_ciudad,
+                    u.estado_region AS usuario_estado,
+                    u.codigo_postal AS usuario_cp,
+                    u.pais AS usuario_pais
+                  FROM ordenes o
+                  LEFT JOIN usuarios u ON o.id_usuario = u.id_usuario
+                  ORDER BY o.id_orden DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $rows = $stmt->fetchAll();
+
+        $orders = array_map([$this, 'buildFullOrderObject'], $rows);
+
+        http_response_code(200);
+        echo json_encode($orders);
+    }
+
+    // Obtener el detalle completo de una sola orden por ID
+    public function getOrderById($orderId) {
+        $orderId = (int)$orderId;
+
+        $query = "SELECT 
+                    o.id_orden,
+                    o.id_usuario,
+                    o.monto_total,
+                    o.estado,
+                    o.envio_calle,
+                    o.envio_ciudad,
+                    o.envio_estado,
+                    o.envio_cp,
+                    o.envio_pais,
+                    o.creado_en,
+                    u.nombre AS usuario_nombre,
+                    u.email AS usuario_email,
+                    u.telefono AS usuario_telefono,
+                    u.calle AS usuario_calle,
+                    u.ciudad AS usuario_ciudad,
+                    u.estado_region AS usuario_estado,
+                    u.codigo_postal AS usuario_cp,
+                    u.pais AS usuario_pais
+                  FROM ordenes o
+                  LEFT JOIN usuarios u ON o.id_usuario = u.id_usuario
+                  WHERE o.id_orden = :oid
+                  LIMIT 1";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':oid', $orderId, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch();
+
+        if (!$row) {
+            http_response_code(404);
+            echo json_encode(["status" => "error", "message" => "Orden no encontrada."]);
+            return;
+        }
+
+        http_response_code(200);
+        echo json_encode($this->buildFullOrderObject($row));
+    }
+
+    // Actualizar estado de la orden desde administración
+    public function updateOrderStatus($orderId, $newStatus) {
+        $orderId = (int)$orderId;
+        $normalizedStatus = strtolower(trim($newStatus));
+
+        $allowed = ['pending', 'paid', 'processing', 'shipped', 'delivered', 'cancelled'];
+        if (!in_array($normalizedStatus, $allowed, true)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Estado no válido."]);
+            return;
+        }
+
+        $stmt = $this->conn->prepare("UPDATE ordenes SET estado = :estado WHERE id_orden = :oid");
+        $stmt->bindParam(':estado', $normalizedStatus);
+        $stmt->bindParam(':oid', $orderId, PDO::PARAM_INT);
+
+        if ($stmt->execute()) {
+            http_response_code(200);
+            echo json_encode([
+                "status" => "success",
+                "message" => "Estado actualizado correctamente.",
+                "newStatus" => ucfirst($normalizedStatus)
+            ]);
+        } else {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "No se pudo actualizar el estado."]);
+        }
+    }
+
+    private function buildFullOrderObject($oRow) {
+        $orderId = (int)$oRow['id_orden'];
+
+        $itemsQuery = "SELECT 
+                        oi.id_orden_item,
+                        oi.id_producto,
+                        oi.id_variante,
+                        oi.cantidad,
+                        oi.precio,
+                        oi.atributos,
+                        oi.imagen,
+                        p.nombre AS producto_nombre,
+                        p.imagenes_base,
+                        pv.atributos AS variante_atributos
+                       FROM ordenes_items oi
+                       LEFT JOIN productos p ON oi.id_producto = p.id_producto
+                       LEFT JOIN producto_variantes pv ON oi.id_variante = pv.id_variante
+                       WHERE oi.id_orden = :oid
+                       ORDER BY oi.id_orden_item ASC";
+
+        $itemsStmt = $this->conn->prepare($itemsQuery);
+        $itemsStmt->execute([':oid' => $orderId]);
+        $itemRows = $itemsStmt->fetchAll();
+
+        $subtotal = 0;
+        $formattedItems = [];
+
+        foreach ($itemRows as $iRow) {
+            $attrs = json_decode($iRow['atributos'], true);
+            if (!is_array($attrs) || empty($attrs)) {
+                $attrs = json_decode($iRow['variante_atributos'] ?? '{}', true) ?: [];
+            }
+
+            $baseImgs = json_decode($iRow['imagenes_base'] ?? '[]', true) ?: [];
+            $itemImage = !empty($iRow['imagen']) ? $iRow['imagen'] : ($baseImgs[0] ?? '');
+
+            $unitPrice = (float)$iRow['precio'];
+            $qty = (int)$iRow['cantidad'];
+            $lineTotal = round($unitPrice * $qty, 2);
+            $subtotal += $lineTotal;
+
+            $formattedItems[] = [
+                "itemId" => (int)$iRow['id_orden_item'],
+                "productId" => (int)$iRow['id_producto'],
+                "variantId" => $iRow['id_variante'] ? (int)$iRow['id_variante'] : null,
+                "name" => $iRow['producto_nombre'] ?: 'Product #' . $iRow['id_producto'],
+                "price" => $unitPrice,
+                "quantity" => $qty,
+                "lineTotal" => $lineTotal,
+                "attributes" => empty($attrs) ? new stdClass() : $attrs,
+                "image" => $itemImage
+            ];
+        }
+
+        $subtotal = round($subtotal, 2);
+        $total = round((float)$oRow['monto_total'], 2);
+        $shipping = max(0, round($total - $subtotal, 2));
+
+        $street = !empty($oRow['envio_calle']) ? $oRow['envio_calle'] : ($oRow['usuario_calle'] ?? '');
+        $city = !empty($oRow['envio_ciudad']) ? $oRow['envio_ciudad'] : ($oRow['usuario_ciudad'] ?? '');
+        $state = !empty($oRow['envio_estado']) ? $oRow['envio_estado'] : ($oRow['usuario_estado'] ?? '');
+        $zipCode = !empty($oRow['envio_cp']) ? $oRow['envio_cp'] : ($oRow['usuario_cp'] ?? '');
+        $country = !empty($oRow['envio_pais']) ? $oRow['envio_pais'] : ($oRow['usuario_pais'] ?? '');
+
+        return [
+            "orderId" => $orderId,
+            "orderCode" => "ORD-" . str_pad((string)$orderId, 5, "0", STR_PAD_LEFT),
+            "status" => ucfirst($oRow['estado']),
+            "date" => $oRow['creado_en'],
+            "user" => [
+                "id" => $oRow['id_usuario'] ? (string)$oRow['id_usuario'] : null,
+                "name" => $oRow['usuario_nombre'] ?: 'Guest Customer',
+                "email" => $oRow['usuario_email'] ?: 'No email registered',
+                "phone" => $oRow['usuario_telefono'] ?: 'Not provided'
+            ],
+            "shippingAddress" => [
+                "street" => $street,
+                "city" => $city,
+                "state" => $state,
+                "zipCode" => $zipCode,
+                "country" => $country
+            ],
+            "totals" => [
+                "subtotal" => $subtotal,
+                "shipping" => $shipping,
+                "total" => $total
+            ],
+            "items" => $formattedItems
+        ];
     }
 }
 ?>

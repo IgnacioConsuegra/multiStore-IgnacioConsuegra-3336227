@@ -21,9 +21,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Cargar productos y categorías desde el Backend PHP en paralelo
     try {
-        const [productsRes, categoriesRes] = await Promise.all([
-            fetch('../backend/api/products.php'),
-            fetch('../backend/api/categories.php')
+       const [productsRes, categoriesRes] = await Promise.all([
+            fetch(`../backend/api/products.php?t=${Date.now()}`, { cache: 'no-store' }),
+            fetch(`../backend/api/categories.php?t=${Date.now()}`, { cache: 'no-store' })
         ]);
 
         if (!productsRes.ok || !categoriesRes.ok) {

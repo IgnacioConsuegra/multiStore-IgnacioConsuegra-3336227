@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details - Academia Admin</title>
+
+    <link href="../vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../vendor/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../css/admin-orders.css">
+</head>
+
+<body>
+    <!-- Navbar Container -->
+    <div id="navbar-container"></div>
+
+    <main class="admin-orders-wrapper py-5">
+        <div class="container max-w-7xl">
+            <div id="adminManagement"></div>
+
+            <!-- Back Link -->
+            <a href="admin-orders.html" class="back-link d-inline-flex align-items-center gap-2 mb-4 text-decoration-none">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Back to Orders</span>
+            </a>
+
+            <!-- Loading State -->
+            <div id="order-loading" class="bg-paper border custom-border-light rounded-1 p-5 text-center shadow-sm">
+                <div class="spinner-border text-dark mb-3" role="status"></div>
+                <p class="text-muted-custom mb-0">Loading order details...</p>
+            </div>
+
+            <!-- Error State -->
+            <div id="order-error" class="bg-paper border custom-border-light rounded-1 p-5 text-center shadow-sm d-none">
+                <i class="fa-solid fa-circle-exclamation text-danger display-5 mb-3"></i>
+                <h3 class="font-heading fw-bold text-dark-custom mb-2">Order not found</h3>
+                <p class="text-muted-custom mb-4">The order you are looking for does not exist or could not be loaded.</p>
+                <a href="admin-orders.html" class="btn btn-dark rounded-1 px-4 py-2">Return to Orders</a>
+            </div>
+
+            <!-- Order Details Content -->
+            <div id="order-details-content" class="d-none animate-fade-in">
+
+                <!-- Header Bar -->
+                <div class="bg-paper border custom-border-light rounded-1 p-4 shadow-sm mb-4">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                        <div>
+                            <div class="d-flex align-items-center gap-3 mb-1">
+                                <h1 class="font-heading fw-bold text-dark-custom fs-3 mb-0" id="detail-order-code">ORD-00000</h1>
+                                <span id="detail-status-badge" class="status-badge">Pending</span>
+                            </div>
+                            <p class="text-muted-custom small mb-0">
+                                <i class="fa-regular fa-calendar me-1"></i> Placed on <span id="detail-order-date"></span>
+                            </p>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <label for="detail-status-select" class="small text-muted-custom fw-medium mb-0">Change Status:</label>
+                            <select id="detail-status-select" class="form-select form-select-sm status-select w-auto">
+                                <option value="Pending">Pending</option>
+                                <option value="Paid">Paid</option>
+                                <option value="Processing">Processing</option>
+                                <option value="Shipped">Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                                <option value="Cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Customer Info & Shipping Address -->
+                <div class="row g-4 mb-4">
+                    <!-- Customer Information -->
+                    <div class="col-12 col-md-6">
+                        <div class="bg-paper border custom-border-light rounded-1 p-4 shadow-sm h-100">
+                            <h2 class="font-heading fw-bold text-dark-custom fs-5 border-bottom custom-border-light pb-3 mb-3">
+                                <i class="fa-regular fa-user me-2 text-muted-custom"></i>Customer Information
+                            </h2>
+                            <div class="d-flex flex-column gap-2">
+                                <div>
+                                    <span class="text-muted-custom small d-block">Full Name</span>
+                                    <span class="fw-semibold text-dark-custom" id="detail-buyer-name">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted-custom small d-block">Email Address</span>
+                                    <span class="text-dark-custom" id="detail-buyer-email">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-muted-custom small d-block">Phone Number</span>
+                                    <span class="fw-medium text-dark-custom" id="detail-buyer-phone">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shipping Address -->
+                    <div class="col-12 col-md-6">
+                        <div class="bg-paper border custom-border-light rounded-1 p-4 shadow-sm h-100">
+                            <h2 class="font-heading fw-bold text-dark-custom fs-5 border-bottom custom-border-light pb-3 mb-3">
+                                <i class="fa-solid fa-location-dot me-2 text-muted-custom"></i>Shipping Address
+                            </h2>
+                            <div class="d-flex flex-column gap-2">
+                                <div>
+                                    <span class="text-muted-custom small d-block">Street Address</span>
+                                    <span class="fw-medium text-dark-custom" id="detail-ship-street">-</span>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <span class="text-muted-custom small d-block">City</span>
+                                        <span class="text-dark-custom" id="detail-ship-city">-</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="text-muted-custom small d-block">State / Region</span>
+                                        <span class="text-dark-custom" id="detail-ship-state">-</span>
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <span class="text-muted-custom small d-block">Postal / Zip Code</span>
+                                        <span class="text-dark-custom" id="detail-ship-zip">-</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <span class="text-muted-custom small d-block">Country</span>
+                                        <span class="text-dark-custom" id="detail-ship-country">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ordered Products & Financial Summary -->
+                <div class="row g-4">
+                    <!-- Products Purchased -->
+                    <div class="col-12 col-lg-8">
+                        <div class="bg-paper border custom-border-light rounded-1 shadow-sm overflow-hidden">
+                            <div class="p-4 border-bottom custom-border-light">
+                                <h2 class="font-heading fw-bold text-dark-custom fs-5 mb-0">
+                                    Purchased Items (<span id="detail-items-count">0</span>)
+                                </h2>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table custom-table mb-0 align-middle">
+                                    <thead class="bg-light-custom">
+                                        <tr>
+                                            <th class="text-dark-custom fw-semibold py-3 px-4 font-sans text-uppercase small">Product & Variant</th>
+                                            <th class="text-dark-custom fw-semibold py-3 px-4 font-sans text-uppercase small text-center">Qty</th>
+                                            <th class="text-dark-custom fw-semibold py-3 px-4 font-sans text-uppercase small text-end">Unit Price</th>
+                                            <th class="text-dark-custom fw-semibold py-3 px-4 font-sans text-uppercase small text-end">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="detail-items-tbody" class="border-top-0">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary -->
+                    <div class="col-12 col-lg-4">
+                        <div class="bg-paper border custom-border-light rounded-1 p-4 shadow-sm">
+                            <h2 class="font-heading fw-bold text-dark-custom fs-5 border-bottom custom-border-light pb-3 mb-4">
+                                Payment Summary
+                            </h2>
+                            <div class="d-flex flex-column gap-3 text-muted-custom">
+                                <div class="d-flex justify-content-between">
+                                    <span>Subtotal</span>
+                                    <span class="fw-medium text-dark-custom" id="detail-subtotal">$0.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span>Shipping</span>
+                                    <span class="fw-medium text-dark-custom" id="detail-shipping">$0.00</span>
+                                </div>
+                                <div class="border-top custom-border-light pt-3 mt-1 d-flex justify-content-between align-items-center">
+                                    <span class="font-heading fw-bold text-dark-custom fs-5">Total Paid</span>
+                                    <span class="font-heading fw-bold text-dark-custom fs-4" id="detail-total">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <div id="footer-container"></div>
+
+    <script src="../vendor/bootstrap.bundle.min.js"></script>
+    <script src="../js/admin-order-details.js"></script>
+    <script src="../js/fetchAdminNav.js"></script>
+    <script src="../js/fetchNavBar.js"></script>
+    <script src="../js/navbar.js"></script>
+</body>
+
+</html>

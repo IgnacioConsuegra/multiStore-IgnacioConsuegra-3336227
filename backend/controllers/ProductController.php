@@ -19,8 +19,7 @@ class ProductController {
                     GREATEST(
                         COALESCE(MAX(c.porcentaje_descuento), 0),
                         COALESCE((SELECT porcentaje_descuento FROM categorias WHERE LOWER(nombre) = 'all' LIMIT 1), 0)
-                    ) AS max_descuento,
-                    COALESCE((SELECT SUM(stock) FROM producto_variantes WHERE id_producto = p.id_producto), 0) AS stock_total
+                    ) AS max_descuento
                   FROM productos p
                   LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
                   LEFT JOIN categorias c ON pc.id_categoria = c.id_categoria
@@ -31,7 +30,18 @@ class ProductController {
         $stmt->execute();
         $rows = $stmt->fetchAll();
 
-        $products = array_map([$this, 'formatProduct'], $rows);
+        $varStmt = $this->conn->query("SELECT id_variante, id_producto, atributos, imagenes, stock, vendidos, precio_delta 
+                                       FROM producto_variantes 
+                                       ORDER BY id_variante ASC");
+        $variantsByProduct = [];
+        foreach ($varStmt->fetchAll() as $vRow) {
+            $variantsByProduct[$vRow['id_producto']][] = $vRow;
+        }
+
+        $products = array_map(function($row) use ($variantsByProduct) {
+            $prodVariants = $variantsByProduct[$row['id_producto']] ?? [];
+            return $this->formatProduct($row, $prodVariants);
+        }, $rows);
 
         http_response_code(200);
         echo json_encode($products);
@@ -50,8 +60,7 @@ class ProductController {
                     GREATEST(
                         COALESCE(MAX(c.porcentaje_descuento), 0),
                         COALESCE((SELECT porcentaje_descuento FROM categorias WHERE LOWER(nombre) = 'all' LIMIT 1), 0)
-                    ) AS max_descuento,
-                    COALESCE((SELECT SUM(stock) FROM producto_variantes WHERE id_producto = p.id_producto), 0) AS stock_total
+                    ) AS max_descuento
                   FROM productos p
                   LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
                   LEFT JOIN categorias c ON pc.id_categoria = c.id_categoria
@@ -65,8 +74,16 @@ class ProductController {
         $row = $stmt->fetch();
 
         if ($row) {
+            $varStmt = $this->conn->prepare("SELECT id_variante, id_producto, atributos, imagenes, stock, vendidos, precio_delta 
+                                             FROM producto_variantes 
+                                             WHERE id_producto = :id 
+                                             ORDER BY id_variante ASC");
+            $varStmt->bindParam(':id', $id);
+            $varStmt->execute();
+            $prodVariants = $varStmt->fetchAll();
+
             http_response_code(200);
-            echo json_encode($this->formatProduct($row));
+            echo json_encode($this->formatProduct($row, $prodVariants));
         } else {
             http_response_code(404);
             echo json_encode(["status" => "error", "message" => "Producto no encontrado"]);
@@ -80,14 +97,12 @@ class ProductController {
             $nombre = trim($data['name'] ?? '');
             $descripcion = trim($data['description'] ?? '');
             $precioBase = (float)($data['price'] ?? 0);
-            $stock = max(0, (int)($data['stock'] ?? 0));
-            $imagen = trim($data['image'] ?? '');
             $destacado = isset($data['featured']) ? (int)$data['featured'] : 1;
 
-            $imagenesJson = json_encode($imagen ? [$imagen] : [], JSON_UNESCAPED_UNICODE);
-            $opcionesJson = $this->buildOptionsJson($data);
+            $baseImages = $this->normalizeImagesArray($data['images'] ?? ($data['image'] ?? []));
+            $imagenesJson = json_encode($baseImages, JSON_UNESCAPED_UNICODE);
+            $opcionesJson = json_encode($data['options'] ?? [], JSON_UNESCAPED_UNICODE);
 
-            // 1. Insertar producto
             $stmt = $this->conn->prepare("INSERT INTO productos (nombre, descripcion, precio_base, imagenes_base, destacado, opciones) 
                                           VALUES (:nombre, :descripcion, :precio, :imagenes, :destacado, :opciones)");
             $stmt->execute([
@@ -101,16 +116,7 @@ class ProductController {
 
             $productId = (int)$this->conn->lastInsertId();
 
-            // 2. Insertar variante base con el stock
-            $varStmt = $this->conn->prepare("INSERT INTO producto_variantes (id_producto, atributos, imagenes, stock, vendidos, precio_delta) 
-                                             VALUES (:pid, '{}', :imagenes, :stock, 0, 0.00)");
-            $varStmt->execute([
-                ':pid' => $productId,
-                ':imagenes' => $imagenesJson,
-                ':stock' => $stock
-            ]);
-
-            // 3. Vincular categorías (incluyendo 'All' por defecto)
+            $this->syncVariants($productId, $data['variants'] ?? [], $baseImages, $precioBase);
             $this->syncCategories($productId, $data['categories'] ?? []);
 
             $this->conn->commit();
@@ -139,13 +145,11 @@ class ProductController {
             $nombre = trim($data['name'] ?? '');
             $descripcion = trim($data['description'] ?? '');
             $precioBase = (float)($data['price'] ?? 0);
-            $stock = max(0, (int)($data['stock'] ?? 0));
-            $imagen = trim($data['image'] ?? '');
 
-            $imagenesJson = json_encode($imagen ? [$imagen] : [], JSON_UNESCAPED_UNICODE);
-            $opcionesJson = $this->buildOptionsJson($data);
+            $baseImages = $this->normalizeImagesArray($data['images'] ?? ($data['image'] ?? []));
+            $imagenesJson = json_encode($baseImages, JSON_UNESCAPED_UNICODE);
+            $opcionesJson = json_encode($data['options'] ?? [], JSON_UNESCAPED_UNICODE);
 
-            // 1. Actualizar tabla productos
             $stmt = $this->conn->prepare("UPDATE productos 
                                           SET nombre = :nombre, 
                                               descripcion = :descripcion, 
@@ -162,30 +166,7 @@ class ProductController {
                 ':id' => $productId
             ]);
 
-            // 2. Actualizar stock en producto_variantes
-            $varCheck = $this->conn->prepare("SELECT id_variante FROM producto_variantes WHERE id_producto = :pid ORDER BY id_variante ASC LIMIT 1");
-            $varCheck->execute([':pid' => $productId]);
-            $firstVar = $varCheck->fetch();
-
-            if ($firstVar) {
-                $this->conn->prepare("UPDATE producto_variantes SET stock = 0 WHERE id_producto = :pid")->execute([':pid' => $productId]);
-                $updVar = $this->conn->prepare("UPDATE producto_variantes SET stock = :stock, imagenes = :imagenes WHERE id_variante = :vid");
-                $updVar->execute([
-                    ':stock' => $stock,
-                    ':imagenes' => $imagenesJson,
-                    ':vid' => (int)$firstVar['id_variante']
-                ]);
-            } else {
-                $insVar = $this->conn->prepare("INSERT INTO producto_variantes (id_producto, atributos, imagenes, stock, vendidos, precio_delta) 
-                                                VALUES (:pid, '{}', :imagenes, :stock, 0, 0.00)");
-                $insVar->execute([
-                    ':pid' => $productId,
-                    ':imagenes' => $imagenesJson,
-                    ':stock' => $stock
-                ]);
-            }
-
-            // 3. Sincronizar categorías (manteniendo siempre 'All')
+            $this->syncVariants($productId, $data['variants'] ?? [], $baseImages, $precioBase);
             $this->syncCategories($productId, $data['categories'] ?? []);
 
             $this->conn->commit();
@@ -215,26 +196,95 @@ class ProductController {
         }
     }
 
-    private function buildOptionsJson($data) {
-        $opciones = [];
-        if (!empty($data['sizes'])) {
-            $opciones[] = ["name" => "Size", "values" => array_values($data['sizes'])];
+    private function normalizeImagesArray($input) {
+        if (is_array($input)) {
+            return array_values(array_filter(array_map('trim', $input), fn($u) => $u !== ''));
         }
-        if (!empty($data['colors'])) {
-            $opciones[] = ["name" => "Color", "values" => array_values($data['colors'])];
+        if (is_string($input) && trim($input) !== '') {
+            $parts = preg_split('/[\r\n,]+/', $input);
+            return array_values(array_filter(array_map('trim', $parts), fn($u) => $u !== ''));
         }
-        if (!empty($data['materials'])) {
-            $opciones[] = ["name" => "Material", "values" => array_values($data['materials'])];
+        return [];
+    }
+
+    private function syncVariants($productId, $variants, $fallbackImages, $basePrice) {
+        if (empty($variants)) {
+            $variants = [[
+                'attributes' => new stdClass(),
+                'stock' => 0,
+                'sold' => 0,
+                'price' => $basePrice,
+                'images' => $fallbackImages
+            ]];
         }
-        return json_encode($opciones, JSON_UNESCAPED_UNICODE);
+
+        $keptIds = [];
+
+        $updStmt = $this->conn->prepare("UPDATE producto_variantes 
+                                         SET atributos = :attrs, imagenes = :imgs, stock = :stock, vendidos = :sold, precio_delta = :delta 
+                                         WHERE id_variante = :vid AND id_producto = :pid");
+
+        $insStmt = $this->conn->prepare("INSERT INTO producto_variantes (id_producto, atributos, imagenes, stock, vendidos, precio_delta) 
+                                         VALUES (:pid, :attrs, :imgs, :stock, :sold, :delta)");
+
+        foreach ($variants as $v) {
+            $vId = isset($v['id']) ? (int)$v['id'] : 0;
+            $attrs = !empty($v['attributes']) ? $v['attributes'] : new stdClass();
+            $attrsJson = json_encode($attrs, JSON_UNESCAPED_UNICODE);
+
+            $varImages = $this->normalizeImagesArray($v['images'] ?? ($v['image'] ?? []));
+            $imgsJson = json_encode($varImages, JSON_UNESCAPED_UNICODE);
+
+            $stock = max(0, (int)($v['stock'] ?? 0));
+            $sold = max(0, (int)($v['sold'] ?? 0));
+
+            $variantPrice = (isset($v['price']) && $v['price'] !== '' && $v['price'] !== null)
+                ? (float)$v['price']
+                : $basePrice;
+            $precioDelta = round($variantPrice - $basePrice, 2);
+
+            if ($vId > 0) {
+                $updStmt->execute([
+                    ':attrs' => $attrsJson,
+                    ':imgs' => $imgsJson,
+                    ':stock' => $stock,
+                    ':sold' => $sold,
+                    ':delta' => $precioDelta,
+                    ':vid' => $vId,
+                    ':pid' => $productId
+                ]);
+                $keptIds[] = $vId;
+            } else {
+                $insStmt->execute([
+                    ':pid' => $productId,
+                    ':attrs' => $attrsJson,
+                    ':imgs' => $imgsJson,
+                    ':stock' => $stock,
+                    ':sold' => $sold,
+                    ':delta' => $precioDelta
+                ]);
+                $keptIds[] = (int)$this->conn->lastInsertId();
+            }
+        }
+
+        if (!empty($keptIds)) {
+            $placeholders = implode(',', array_fill(0, count($keptIds), '?'));
+            $params = array_merge([$productId], $keptIds);
+
+            try {
+                $delStmt = $this->conn->prepare("DELETE FROM producto_variantes WHERE id_producto = ? AND id_variante NOT IN ($placeholders)");
+                $delStmt->execute($params);
+            } catch (Exception $e) {
+                $zeroStmt = $this->conn->prepare("UPDATE producto_variantes SET stock = 0 WHERE id_producto = ? AND id_variante NOT IN ($placeholders)");
+                $zeroStmt->execute($params);
+            }
+        }
     }
 
     private function syncCategories($productId, $selectedNames) {
-        // Limpiar asociaciones actuales
         $delStmt = $this->conn->prepare("DELETE FROM producto_categorias WHERE id_producto = :pid");
         $delStmt->execute([':pid' => $productId]);
 
-        // Asegurar que 'All' siempre esté incluido por defecto
         $namesToLink = array_unique(array_merge(['All'], is_array($selectedNames) ? $selectedNames : []));
 
         $findCat = $this->conn->prepare("SELECT id_categoria FROM categorias WHERE LOWER(nombre) = LOWER(:nombre) LIMIT 1");
@@ -256,14 +306,50 @@ class ProductController {
         }
     }
 
-    private function formatProduct($row) {
-        $imagenes = json_decode($row['imagenes_base'], true) ?: [];
+    private function formatProduct($row, $variantRows = []) {
+        $imagenesBase = json_decode($row['imagenes_base'], true) ?: [];
         $opciones = json_decode($row['opciones'], true) ?: [];
 
         $rawCategories = !empty($row['categorias']) ? explode(',', $row['categorias']) : [];
         $categoriesList = array_values(array_filter($rawCategories, function($cat) {
             return strtolower(trim($cat)) !== 'all';
         }));
+
+        $basePrice = (float)$row['precio_base'];
+        $discount = (float)$row['max_descuento'];
+        $finalPrice = $discount > 0 ? round($basePrice * (1 - ($discount / 100)), 2) : $basePrice;
+
+        $formattedVariants = [];
+        $totalStock = 0;
+        $totalSold = 0;
+
+        foreach ($variantRows as $vRow) {
+            $vImgs = json_decode($vRow['imagenes'], true) ?: [];
+            $vAttrs = json_decode($vRow['atributos'], true);
+            if (!is_array($vAttrs)) $vAttrs = [];
+
+            $vStock = (int)$vRow['stock'];
+            $vSold = (int)$vRow['vendidos'];
+            $vDelta = (float)($vRow['precio_delta'] ?? 0);
+
+            $vOriginalPrice = round($basePrice + $vDelta, 2);
+            $vFinalPrice = $discount > 0 ? round($vOriginalPrice * (1 - ($discount / 100)), 2) : $vOriginalPrice;
+
+            $totalStock += $vStock;
+            $totalSold += $vSold;
+
+            $formattedVariants[] = [
+                "id" => (int)$vRow['id_variante'],
+                "attributes" => empty($vAttrs) ? new stdClass() : $vAttrs,
+                "images" => $vImgs,
+                "image" => $vImgs[0] ?? '',
+                "stock" => $vStock,
+                "sold" => $vSold,
+                "originalPrice" => $vOriginalPrice,
+                "price" => $vFinalPrice,
+                "priceDelta" => $vDelta
+            ];
+        }
 
         $sizes = [];
         $colors = [];
@@ -276,22 +362,22 @@ class ProductController {
             if ($name === 'material') $materials = $opt['values'] ?? [];
         }
 
-        $basePrice = (float)$row['precio_base'];
-        $discount = (float)$row['max_descuento'];
-        $finalPrice = $discount > 0 ? $basePrice * (1 - ($discount / 100)) : $basePrice;
-
         return [
             "id" => (string)$row['id_producto'],
             "name" => $row['nombre'],
-            "price" => round($finalPrice, 2),
+            "price" => $finalPrice,
             "originalPrice" => $basePrice,
             "discount" => $discount,
-            "image" => $imagenes[0] ?? '',
+            "images" => $imagenesBase,
+            "image" => $imagenesBase[0] ?? '',
             "description" => $row['descripcion'],
             "category" => $categoriesList[0] ?? 'All',
             "categories" => $categoriesList,
-            "stock" => (int)$row['stock_total'],
+            "stock" => $totalStock,
+            "sold" => $totalSold,
             "featured" => (bool)$row['destacado'],
+            "options" => $opciones,
+            "variants" => $formattedVariants,
             "sizes" => $sizes,
             "colors" => $colors,
             "materials" => $materials

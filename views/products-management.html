@@ -1,22 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Management - Academia</title>
-
+    
     <link href="../vendor/bootstrap.min.css" rel="stylesheet">
     <link href="../vendor/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap"
-        rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="../css/products-management.css">
 </head>
-
 <body>
     <!-- Navbar Container -->
     <div id="navbar-container"></div>
@@ -28,35 +24,37 @@
             <!-- Header -->
             <div class="d-flex justify-content-between align-items-center mb-5">
                 <h2 class="font-heading fw-bold text-dark-custom mb-0 fs-4">Product Management</h2>
-                <button id="toggle-form-btn" class=" btn-custom px-4 py-2 d-flex align-items-center gap-2">
+                <button id="toggle-form-btn" type="button" class="btn-custom px-4 py-2 d-flex align-items-center gap-2">
                     <i class="fa-solid fa-plus"></i> Add Product
                 </button>
             </div>
 
-            <!-- Form Section (hidden by default ) -->
-            <div id="product-form-section"
-                class="bg-paper p-4 p-md-5 rounded-1 border custom-border-light shadow-sm mb-5 d-none animate-slide-down">
-                <h3 class="font-heading fs-4 fw-bold text-dark-custom border-bottom custom-border-light pb-3 mb-4"
-                    id="form-title">Create New Product</h3>
-
+            <!-- Form Section (hidden by default) -->
+            <div id="product-form-section" class="bg-paper p-4 p-md-5 rounded-1 border custom-border-light shadow-sm mb-5 d-none animate-slide-down">
+                <h3 class="font-heading fs-4 fw-bold text-dark-custom border-bottom custom-border-light pb-3 mb-4" id="form-title">Create New Product</h3>
+                
                 <form id="product-form">
                     <input type="hidden" id="product-id">
-
+                    
                     <div class="row g-4 mb-4">
                         <div class="col-md-6">
                             <label class="form-label text-dark-custom fw-medium small mb-1">Product Name</label>
                             <input type="text" id="prod-name" class="form-control simple-input" required>
                         </div>
+
+                        <!-- Categories Dropdown -->
                         <div class="col-md-6">
                             <label class="form-label text-dark-custom fw-medium small mb-1">Categories</label>
                             <div class="dropdown w-100" id="category-dropdown-wrapper">
-                                <button type="button" id="category-dropdown-btn"
-                                    class="form-select simple-input text-start d-flex justify-content-between align-items-center"
-                                    data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                <button type="button" 
+                                        id="category-dropdown-btn" 
+                                        class="form-select simple-input text-start d-flex justify-content-between align-items-center" 
+                                        data-bs-toggle="dropdown" 
+                                        data-bs-auto-close="outside" 
+                                        aria-expanded="false">
                                     <span id="selected-categories-label" class="text-truncate">All (Default)</span>
                                 </button>
-                                <ul class="dropdown-menu w-100 p-3 shadow-sm border custom-border-light"
-                                    id="category-dropdown-menu" style="max-height: 240px; overflow-y: auto;">
+                                <ul class="dropdown-menu w-100 p-3 shadow-sm border custom-border-light" id="category-dropdown-menu" style="max-height: 240px; overflow-y: auto;">
                                     <li class="text-muted small">Click to load categories...</li>
                                 </ul>
                             </div>
@@ -69,47 +67,69 @@
                     </div>
 
                     <div class="row g-4 mb-4">
-                        <div class="col-md-4">
-                            <label class="form-label text-dark-custom fw-medium small mb-1">Price ($)</label>
-                            <input type="number" step="0.01" id="prod-price" class="form-control simple-input" required>
+                        <div class="col-md-5">
+                            <label class="form-label text-dark-custom fw-medium small mb-1">
+                                Base Price ($) <span class="text-muted fw-normal">(Use dot <strong>.</strong> for decimals, no commas)</span>
+                            </label>
+                            <input type="text" inputmode="decimal" id="prod-price" class="form-control simple-input" placeholder="e.g. 90.00" required>
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label text-dark-custom fw-medium small mb-1">Stock</label>
-                            <input type="number" id="prod-stock" class="form-control simple-input" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label text-dark-custom fw-medium small mb-1">Image URL</label>
-                            <input type="url" id="prod-image" class="form-control simple-input"
-                                placeholder="https://..." required>
+                        <div class="col-md-7">
+                            <label class="form-label text-dark-custom fw-medium small mb-1">
+                                Base Image URLs <span class="text-muted fw-normal">(Separate multiple URLs with commas or new lines)</span>
+                            </label>
+                            <textarea id="prod-images" class="form-control simple-input" rows="2" placeholder="https://image1.jpg, https://image2.jpg" required></textarea>
+                            <div id="base-images-preview" class="d-flex flex-wrap gap-2 mt-2"></div>
                         </div>
                     </div>
 
-                    <!-- Properties -->
+                    <!-- Dynamic Properties Builder -->
                     <div class="border-top custom-border-light pt-4 mb-4">
-                        <h4 class="font-heading fs-5 fw-semibold text-dark-custom mb-3">Properties (Comma separated)
-                        </h4>
-                        <div class="row g-4">
-                            <div class="col-md-4">
-                                <label class="form-label text-dark-custom fw-medium small mb-1">Sizes</label>
-                                <input type="text" id="prod-sizes" class="form-control simple-input"
-                                    placeholder="e.g. S, M, L, XL">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h4 class="font-heading fs-5 fw-semibold text-dark-custom mb-0">Custom Properties</h4>
+                                <p class="text-muted-custom small mb-0">Add any properties you need (e.g. Color, Size, Material) and separate values with commas.</p>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-dark-custom fw-medium small mb-1">Colors</label>
-                                <input type="text" id="prod-colors" class="form-control simple-input"
-                                    placeholder="e.g. Black, Navy, Beige">
+                            <button type="button" id="add-property-btn" class="btn btn-sm btn-outline-dark d-flex align-items-center gap-2 px-3 py-2">
+                                <i class="fa-solid fa-plus"></i> Add Property
+                            </button>
+                        </div>
+
+                        <div id="dynamic-properties-container" class="d-flex flex-column gap-3">
+                        </div>
+                    </div>
+
+                    <!-- Variant Combinations Table -->
+                    <div class="border-top custom-border-light pt-4 mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h4 class="font-heading fs-5 fw-semibold text-dark-custom mb-0">Variants, Price & Inventory</h4>
+                                <p class="text-muted-custom small mb-0">Each combination inherits the Base Price by default (use dot <strong>.</strong> for decimals). You can customize price, stock, sold units, and multiple image URLs per variant.</p>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label text-dark-custom fw-medium small mb-1">Materials</label>
-                                <input type="text" id="prod-materials" class="form-control simple-input"
-                                    placeholder="e.g. Cotton, Wool">
-                            </div>
+                            <button type="button" id="generate-variants-btn" class="btn btn-sm btn-secondary d-flex align-items-center gap-2 px-3 py-2">
+                                <i class="fa-solid fa-rotate"></i> Refresh Combinations
+                            </button>
+                        </div>
+
+                        <div class="table-responsive border custom-border-light rounded-1 bg-white">
+                            <table class="table mb-0 align-middle">
+                                <thead class="bg-light-custom">
+                                    <tr>
+                                        <th class="small fw-semibold text-dark-custom py-2 px-3">Combination</th>
+                                        <th class="small fw-semibold text-dark-custom py-2 px-3" style="width: 130px;">Price ($) <small class="fw-normal text-muted">(Dot .)</small></th>
+                                        <th class="small fw-semibold text-dark-custom py-2 px-3" style="width: 105px;">Stock</th>
+                                        <th class="small fw-semibold text-dark-custom py-2 px-3" style="width: 105px;">Sold</th>
+                                        <th class="small fw-semibold text-dark-custom py-2 px-3">Variant Image URLs (Comma/line separated)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="variants-tbody">
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-end gap-3">
-                        <button type="button" id="cancel-form-btn" class=" btn-outline-custom px-4 py-2">Cancel</button>
-                        <button type="submit" class=" btn-custom px-5 py-2">Save Product</button>
+                        <button type="button" id="cancel-form-btn" class="btn-outline-custom px-4 py-2">Cancel</button>
+                        <button type="submit" id="save-product-btn" class="btn-custom px-5 py-2">Save Product</button>
                     </div>
                 </form>
             </div>
@@ -121,10 +141,10 @@
                         <thead class="bg-light-custom">
                             <tr>
                                 <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Product</th>
-                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Category</th>
-                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Price</th>
-                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Stock</th>
-                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Discount</th>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Categories</th>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Base Price</th>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Total Stock</th>
+                                <th class="text-dark-custom font-heading fw-semibold py-3 px-4">Sold / Discount</th>
                                 <th class="text-dark-custom font-heading fw-semibold py-3 px-4 text-end">Actions</th>
                             </tr>
                         </thead>
@@ -143,7 +163,5 @@
     <script src="../js/fetchNavBar.js"></script>
     <script src="../js/fetchAdminNav.js"></script>
     <script src="../js/navbar.js"></script>
-
 </body>
-
 </html>
