@@ -25,7 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Cargar carrito desde MySQL
     async function fetchCart() {
         try {
-            const response = await fetch(`../backend/api/cart.php?userId=${encodeURIComponent(currentUser.id)}`);
+            const response = await fetch(`../backend/api/cart.php?userId=${encodeURIComponent(currentUser.id)}`, {
+                method: 'GET',  
+                credentials: 'same-origin'
+            });
             if (!response.ok) throw new Error('Error al cargar el carrito');
 
             cartItems = await response.json();
@@ -295,7 +298,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <i class="fa-solid fa-circle-check" style="font-size: 3.5rem;"></i>
                         </div>
                         <h4 class="font-heading fw-bold text-dark-custom mb-2">¡El pago se agendó correctamente!</h4>
-                        <p class="text-muted-custom small mb-0">Orden #${result.orderId} generada con éxito.</p>
+                        <p class="text-muted-custom small mb-0">Orden generada con éxito.</p>
                     `;
 
                     // Limpiar el carrito en memoria y actualizar la vista

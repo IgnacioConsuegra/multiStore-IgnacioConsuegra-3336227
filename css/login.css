@@ -14,11 +14,10 @@ body {
 }
 
 .icon-placeholder {
-    background-color: #e5e5e5;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #b3b3b3;
+    width: 64px;
+    height: 64px;
+    background-color: var(--btn-color);
+    border-radius: 4px;
 }
 
 .custom-input-group {

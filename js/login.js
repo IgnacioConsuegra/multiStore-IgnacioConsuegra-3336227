@@ -23,8 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = 'Signing in...';
 
         try {
-            const response = await fetch('../backend/api/login.php', {
+            const response = await fetch('../backend/api/login.php', { // o signup.php
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'Content-Type': 'application/json'
                 },

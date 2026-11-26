@@ -1,4 +1,26 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    const localUser = JSON.parse(localStorage.getItem('user'));
+    if (!localUser || String(localUser.role).toLowerCase() !== 'admin') {
+        window.location.href = '../index.html';
+        return;
+    }
+
+    try {
+        const authRes = await fetch('../backend/api/me.php', {
+            credentials: 'same-origin',
+            cache: 'no-store'
+        });
+        const authData = await authRes.json();
+
+        if (!authRes.ok || !authData.authenticated || String(authData.role).toLowerCase() !== 'admin') {
+            localStorage.removeItem('user');
+            window.location.href = '../index.html';
+            return;
+        }
+    } catch (error) {
+        window.location.href = '../index.html';
+        return;
+    }
     const tbody = document.getElementById('products-tbody');
     const toggleFormBtn = document.getElementById('toggle-form-btn');
     const cancelFormBtn = document.getElementById('cancel-form-btn');

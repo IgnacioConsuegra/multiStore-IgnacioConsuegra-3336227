@@ -1,5 +1,6 @@
 <?php
 require_once '../config/database.php';
+require_once '../config/auth.php';
 require_once '../controllers/OrderController.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -8,14 +9,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
+requireAuth();
+
+$currentUserId = getCurrentUserId();
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (!$data || empty($data['userId'])) {
-    http_response_code(400);
-    echo json_encode(["status" => "error", "message" => "userId es requerido."]);
+if (!empty($data['userId']) && (int)$data['userId'] !== $currentUserId) {
+    http_response_code(403);
+    echo json_encode(["status" => "error", "message" => "No tienes permiso para procesar este pago."]);
     exit();
 }
 
 $controller = new OrderController($conn);
-$controller->processCheckout($data['userId']);
+$controller->processCheckout($currentUserId);
 ?>

@@ -47,9 +47,23 @@ function initNavBar() {
         setTimeout(() => {
             const logoutBtn = document.getElementById('logout-btn');
             if (logoutBtn) {
-                logoutBtn.addEventListener('click', () => {
-                    localStorage.removeItem('user');
-                    window.location.reload();
+                logoutBtn.addEventListener('click', async () => {
+                    const logoutUrl = window.location.pathname.includes('/views/')
+                        ? '../backend/api/logout.php'
+                        : 'backend/api/logout.php';
+
+                    try {
+                        await fetch(logoutUrl, {
+                            method: 'POST',
+                            credentials: 'same-origin'
+                        });
+                    } catch (error) {
+                        console.error('Error cerrando sesión en el servidor:', error);
+                    } finally {
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('cart');
+                        window.location.reload();
+                    }
                 });
             }
         }, 0);

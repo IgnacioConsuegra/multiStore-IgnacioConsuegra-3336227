@@ -139,13 +139,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 3. Cerrar sesión (Logout)
-    btnLogout.addEventListener('click', () => {
-        localStorage.removeItem('user');
-        localStorage.removeItem('cart');
-        window.location.href = '../index.html';
+    btnLogout.addEventListener('click', async () => {
+        try {
+            await fetch('../backend/api/logout.php', {
+                method: 'POST',
+                credentials: 'same-origin'
+            });
+        } catch (error) {
+            console.error('Error cerrando sesión en el servidor:', error);
+        } finally {
+            localStorage.removeItem('user');
+            localStorage.removeItem('cart');
+            window.location.href = '../index.html';
+        }
     });
-
     // 4. Cargar y renderizar historial de órdenes desde MySQL
     function getStatusClass(status) {
         const s = (status || '').toLowerCase();
@@ -163,7 +170,10 @@ document.addEventListener('DOMContentLoaded', () => {
         emptyState.classList.add('d-none');
 
         try {
-            const response = await fetch(`../backend/api/orders.php?userId=${encodeURIComponent(user.id)}`);
+            const response = await fetch(`../backend/api/orders.php?userId=${encodeURIComponent(user.id)}`, {
+                method: 'GET',
+                credentials: 'same-origin'
+            });
             if (!response.ok) throw new Error('Error al obtener órdenes');
 
             const userOrders = await response.json();

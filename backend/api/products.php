@@ -1,8 +1,6 @@
 <?php
-header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
-header("Pragma: no-cache");
-
 require_once '../config/database.php';
+require_once '../config/auth.php';
 require_once '../controllers/ProductController.php';
 
 $controller = new ProductController($conn);
@@ -16,6 +14,7 @@ if ($method === 'GET') {
     }
 
 } elseif ($method === 'POST') {
+    requireAdmin();
     $data = json_decode(file_get_contents("php://input"), true);
     if (!$data || empty($data['name'])) {
         http_response_code(400);
@@ -25,6 +24,7 @@ if ($method === 'GET') {
     $controller->create($data);
 
 } elseif ($method === 'PUT') {
+    requireAdmin();
     $data = json_decode(file_get_contents("php://input"), true);
     if (!$data || empty($data['id'])) {
         http_response_code(400);
@@ -34,6 +34,7 @@ if ($method === 'GET') {
     $controller->update($data);
 
 } elseif ($method === 'DELETE') {
+    requireAdmin();
     if (empty($_GET['id'])) {
         http_response_code(400);
         echo json_encode(["status" => "error", "message" => "ID de producto requerido"]);

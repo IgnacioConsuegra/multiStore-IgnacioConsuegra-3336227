@@ -36,14 +36,51 @@ class UserController {
             return;
         }
 
-        $nombre = trim($data['name'] ?? '');
+        // Normalizar espacios
+        $nombre = preg_replace('/\s+/', ' ', trim($data['name'] ?? ''));
         $telefono = trim($data['phone'] ?? '');
-        $address = $data['address'] ?? [];
-        $calle = trim($address['street'] ?? '');
-        $ciudad = trim($address['city'] ?? '');
-        $estado = trim($address['state'] ?? '');
+        $address = is_array($data['address'] ?? null) ? $data['address'] : [];
+        $calle = preg_replace('/\s+/', ' ', trim($address['street'] ?? ''));
+        $ciudad = preg_replace('/\s+/', ' ', trim($address['city'] ?? ''));
+        $estado = preg_replace('/\s+/', ' ', trim($address['state'] ?? ''));
         $cp = trim($address['zipCode'] ?? '');
-        $pais = trim($address['country'] ?? '');
+        $pais = preg_replace('/\s+/', ' ', trim($address['country'] ?? ''));
+
+        // 1. Validar Nombre (solo letras, espacios y signos básicos de nombre)
+        if (!preg_match("/^[a-zA-ZÀ-ÿ\s'.-]{2,100}$/u", $nombre)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "El nombre debe contener solo letras (2 a 100 caracteres)."]);
+            return;
+        }
+
+        // 2. Validar Teléfono (estrictamente solo números, de 7 a 15 dígitos)
+        if (!preg_match("/^[0-9]{7,15}$/", $telefono)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "El teléfono debe contener únicamente entre 7 y 15 dígitos numéricos."]);
+            return;
+        }
+
+        // 3. Validar Código Postal (estrictamente solo números, de 3 a 10 dígitos)
+        if (!preg_match("/^[0-9]{3,10}$/", $cp)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "El código postal (Zip Code) debe contener únicamente entre 3 y 10 números."]);
+            return;
+        }
+
+        // 4. Validar Calle, Ciudad, Estado y País
+        if (mb_strlen($calle) < 5 || mb_strlen($calle) > 150) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "La dirección de calle debe tener entre 5 y 150 caracteres."]);
+            return;
+        }
+
+        if (!preg_match("/^[a-zA-ZÀ-ÿ\s'.-]{2,100}$/u", $ciudad) ||
+            !preg_match("/^[a-zA-ZÀ-ÿ\s'.-]{2,100}$/u", $estado) ||
+            !preg_match("/^[a-zA-ZÀ-ÿ\s'.-]{2,100}$/u", $pais)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Ciudad, estado y país deben contener únicamente texto válido sin números."]);
+            return;
+        }
 
         $query = "UPDATE usuarios 
                   SET nombre = :nombre,

@@ -1,24 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Academia</title>
-    
+
     <link href="../vendor/bootstrap.min.css" rel="stylesheet">
     <link href="../vendor/all.min.css" rel="stylesheet">
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=PT+Serif:wght@400;700&display=swap"
+        rel="stylesheet">
 
     <link rel="stylesheet" href="../css/signup.css">
 </head>
+
 <body>
-  <div id="navbar-container"></div>
+    <div id="navbar-container"></div>
     <main class="auth-wrapper">
         <div class="signup-container">
-            
+
             <div class="text-center mb-5">
                 <div class="icon-placeholder mx-auto mb-4 d-flex align-items-center justify-content-center">
                     <i class="fa-solid fa-book-open fs-2 text-white"></i>
@@ -33,13 +37,16 @@
 
             <!-- Form -->
             <form id="signup-form">
-                
-                <!-- Full Name -->
+
+                <!-- Full Name (Solo letras y espacios) -->
                 <div class="mb-3">
                     <label for="name" class="form-label text-dark-custom fw-medium small mb-1">Full Name</label>
                     <div class="custom-input-group position-relative">
-                        <i class="fa-regular fa-user position-absolute text-muted-custom" style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
-                        <input type="text" id="name" name="name" class="form-control" placeholder="John Doe" required>
+                        <i class="fa-regular fa-user position-absolute text-muted-custom"
+                            style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
+                        <input type="text" id="name" name="name" class="form-control" placeholder="John Doe"
+                            minlength="2" maxlength="100"
+                            oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s'.-]/g, '')" required>
                     </div>
                 </div>
 
@@ -47,47 +54,62 @@
                 <div class="mb-3">
                     <label for="email" class="form-label text-dark-custom fw-medium small mb-1">Email Address</label>
                     <div class="custom-input-group position-relative">
-                        <i class="fa-regular fa-envelope position-absolute text-muted-custom" style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
-                        <input type="email" id="email" name="email" class="form-control" placeholder="scholar@academia.edu" required>
+                        <i class="fa-regular fa-envelope position-absolute text-muted-custom"
+                            style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
+                        <input type="email" id="email" name="email" class="form-control"
+                            placeholder="scholar@academia.edu" maxlength="100" required>
                     </div>
                 </div>
 
-                <!-- Phone -->
+                <!-- Phone (Solo números: bloquea letras desde teclado físico y móvil) -->
                 <div class="mb-3">
                     <label for="phone" class="form-label text-dark-custom fw-medium small mb-1">Phone Number</label>
                     <div class="custom-input-group position-relative">
-                        <i class="fa-solid fa-phone position-absolute text-muted-custom" style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
-                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="+1 (555) 123-4567" required>
+                        <i class="fa-solid fa-phone position-absolute text-muted-custom"
+                            style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
+                        <input type="tel" id="phone" name="phone" class="form-control" placeholder="5551234567"
+                            inputmode="numeric" pattern="[0-9]{7,15}" minlength="7" maxlength="15"
+                            oninput="this.value = this.value.replace(/\D/g, '')" required>
                     </div>
                 </div>
 
                 <!-- Address Details -->
                 <div class="mb-3">
                     <label class="form-label text-dark-custom fw-medium small mb-1">Address Details</label>
-                    
+
                     <!-- Street -->
                     <div class="custom-input-group position-relative mb-2">
-                        <i class="fa-solid fa-location-dot position-absolute text-muted-custom" style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
-                        <input type="text" id="street" name="street" class="form-control" placeholder="Street Address (e.g. 20 Oak Avenue)" required>
+                        <i class="fa-solid fa-location-dot position-absolute text-muted-custom"
+                            style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
+                        <input type="text" id="street" name="street" class="form-control"
+                            placeholder="Street Address (e.g. 20 Oak Avenue)" minlength="5" maxlength="150" required>
                     </div>
-                    
+
                     <!-- City / State -->
                     <div class="row g-2 mb-2">
                         <div class="col-6">
-                            <input type="text" id="city" name="city" class="form-control simple-input" placeholder="City" required>
+                            <input type="text" id="city" name="city" class="form-control simple-input"
+                                placeholder="City" minlength="2" maxlength="100"
+                                oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s'.-]/g, '')" required>
                         </div>
                         <div class="col-6">
-                            <input type="text" id="state" name="state" class="form-control simple-input" placeholder="State/Province" required>
+                            <input type="text" id="state" name="state" class="form-control simple-input"
+                                placeholder="State/Province" minlength="2" maxlength="100"
+                                oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s'.-]/g, '')" required>
                         </div>
                     </div>
-                    
+
                     <!-- Zip Code / Country -->
                     <div class="row g-2">
                         <div class="col-6">
-                            <input type="text" id="zipCode" name="zipCode" class="form-control simple-input" placeholder="Zip Code" required>
+                            <input type="text" id="zipCode" name="zipCode" class="form-control simple-input"
+                                placeholder="Zip Code" minlength="3" maxlength="12" maxlength="15"
+                                oninput="this.value = this.value.replace(/\D/g, '')" required>
                         </div>
                         <div class="col-6">
-                            <input type="text" id="country" name="country" class="form-control simple-input" placeholder="Country" required>
+                            <input type="text" id="country" name="country" class="form-control simple-input"
+                                placeholder="Country" minlength="2" maxlength="100"
+                                oninput="this.value = this.value.replace(/[^a-zA-ZÀ-ÿ\s'.-]/g, '')" required>
                         </div>
                     </div>
                 </div>
@@ -96,26 +118,31 @@
                 <div class="mb-3">
                     <label for="password" class="form-label text-dark-custom fw-medium small mb-1">Password</label>
                     <div class="custom-input-group position-relative">
-                        <i class="fa-solid fa-lock position-absolute text-muted-custom" style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
-                        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                        <i class="fa-solid fa-lock position-absolute text-muted-custom"
+                            style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••"
+                            minlength="8" maxlength="64" required>
                     </div>
                 </div>
 
                 <!-- Confirm Password -->
                 <div class="mb-4">
-                    <label for="confirmPassword" class="form-label text-dark-custom fw-medium small mb-1">Confirm Password</label>
+                    <label for="confirmPassword" class="form-label text-dark-custom fw-medium small mb-1">Confirm
+                        Password</label>
                     <div class="custom-input-group position-relative">
-                        <i class="fa-solid fa-lock position-absolute text-muted-custom" style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
-                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control" placeholder="••••••••" required>
+                        <i class="fa-solid fa-lock position-absolute text-muted-custom"
+                            style="left: 1rem; top: 50%; transform: translateY(-50%);"></i>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                            placeholder="••••••••" minlength="8" maxlength="64" required>
                     </div>
                 </div>
 
                 <!-- Terms -->
                 <div class="mb-4 form-check d-flex align-items-start gap-2 ps-0">
                     <input type="checkbox" id="terms" class="custom-checkbox mt-1" required>
-                    <label for="terms" class="text-muted-custom small mb-0 lh-sm">
-                        I agree to the <a href="#" class="text-primary-custom text-decoration-none">Terms of Service</a> and <a href="#" class="text-primary-custom text-decoration-none">Privacy Policy</a>
-                    </label>
+                <label for="terms" class="text-muted-custom small mb-0 lh-sm">
+    I agree to the <a href="terms.html" target="_blank" class="text-primary-custom text-decoration-none">Terms of Service</a> and <a href="terms.html" target="_blank" class="text-primary-custom text-decoration-none">Privacy Policy</a>
+</label>
                 </div>
 
                 <!-- Submit Button -->
@@ -125,7 +152,7 @@
 
                 <!-- Sign In Link -->
                 <p class="text-center text-muted-custom small mb-0">
-                    Already have an account? 
+                    Already have an account?
                     <a href="login.html" class="text-primary-custom text-decoration-none fw-medium">Sign in</a>
                 </p>
 
@@ -135,8 +162,9 @@
     <div id="footer-container"></div>
 
     <!-- JS Local -->
-    <script src="../js/signup.js"></script>
+    <script src="../js/signup.js?v=2"></script>
     <script src="../js/fetchNavBar.js"></script>
     <script src="../js/navbar.js"></script>
 </body>
+
 </html>
