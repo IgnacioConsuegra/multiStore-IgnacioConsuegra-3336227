@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Elementos de la galería
     const mainImgEl = document.getElementById('prod-img');
     const thumbsListEl = document.getElementById('vertical-thumbs-list');
     const thumbPrevBtn = document.getElementById('thumb-prev-btn');
@@ -27,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainNextBtn = document.getElementById('main-img-next');
     const fullscreenBtn = document.getElementById('btn-fullscreen-img');
 
-    // 1. Consultar producto en MySQL sin caché
     fetch(`../backend/api/products.php?id=${encodeURIComponent(productId)}&t=${Date.now()}`, { cache: 'no-store' })
         .then(response => {
             if (!response.ok) throw new Error('Producto no encontrado');
@@ -45,10 +43,19 @@ document.addEventListener('DOMContentLoaded', () => {
             window.location.href = 'not-found.html';
         });
 
-    // Construye la lista completa de imágenes (base + todas las variantes) sin duplicados
+    function normalizeVal(v) {
+        return String(v ?? '').trim().toLowerCase();
+    }
+
+    function variantMatchesCriteria(variant, criteria) {
+        const attrs = variant.attributes || {};
+        return Object.keys(criteria).every(key => {
+            return normalizeVal(attrs[key]) === normalizeVal(criteria[key]);
+        });
+    }
+
     function buildGalleryImages(product) {
         const urls = [];
-
         const pushUnique = (url) => {
             if (typeof url === 'string' && url.trim() !== '' && !urls.includes(url.trim())) {
                 urls.push(url.trim());
@@ -72,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return urls;
     }
 
-    // Selecciona una imagen por URL o por índice y sincroniza el carrusel vertical
     function selectGalleryImageByUrl(targetUrl) {
         if (!targetUrl) return;
         const idx = galleryImages.indexOf(targetUrl);
@@ -86,14 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function setActiveImageIndex(newIndex) {
         if (galleryImages.length === 0) return;
 
-        // Carrusel circular en imagen principal
         if (newIndex < 0) newIndex = galleryImages.length - 1;
         if (newIndex >= galleryImages.length) newIndex = 0;
 
         currentImageIndex = newIndex;
         mainImgEl.src = galleryImages[currentImageIndex];
 
-        // Ajustar ventana del carrusel vertical para que la miniatura activa siempre esté dentro de las 4 visibles
         if (currentImageIndex < thumbWindowStart) {
             thumbWindowStart = currentImageIndex;
         } else if (currentImageIndex >= thumbWindowStart + VISIBLE_THUMBS) {
@@ -122,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }).join('');
 
-        // Eventos clic en miniaturas
         thumbsListEl.querySelectorAll('.thumb-item').forEach(btn => {
             btn.addEventListener('click', () => {
                 const idx = parseInt(btn.dataset.imgIndex, 10);
@@ -130,7 +133,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // Mostrar/ocultar flechas del carrusel vertical (cuando hay más de 4 imágenes)
         if (total > VISIBLE_THUMBS) {
             thumbPrevBtn.classList.toggle('d-none', thumbWindowStart === 0);
             thumbNextBtn.classList.toggle('d-none', thumbWindowStart >= maxStart);
@@ -139,7 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
             thumbNextBtn.classList.add('d-none');
         }
 
-        // Flechas izquierda/derecha de la imagen principal
         if (total > 1) {
             mainPrevBtn.classList.remove('d-none');
             mainNextBtn.classList.remove('d-none');
@@ -149,7 +150,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Eventos de navegación de galería
     if (thumbPrevBtn) {
         thumbPrevBtn.addEventListener('click', () => {
             if (thumbWindowStart > 0) {
@@ -189,50 +189,106 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Busca la variante que coincide con las propiedades seleccionadas
+    // Evalúa cada botón de cada propiedad (soporta 10-20+ variantes en cualquier orden de clic)
+    function updateOptionAvailability() {
+        const variants = Array.isArray(currentProduct?.variants) ? currentProduct.variants : [];
+        if (variants.length === 0) return;
+
+        const inStockVariants = variants.filter(v => Number(v.stock) > 0);
+        const groups = Array.from(document.querySelectorAll('.property-group'));
+
+        // Determinar qué opciones tienen stock directo combinadas con las otras selecciones actuales
+        const groupAvailability = new Map();
+
+        groups.forEach(group => {
+            const propName = group.dataset.propName;
+            const buttons = Array.from(group.querySelectorAll('.property-btn'));
+
+            const btnStates = buttons.map(btn => {
+                const val = btn.dataset.propValue;
+                const candidate = { ...selectedAttributes, [propName]: val };
+
+                const directMatch = inStockVariants.some(v => variantMatchesCriteria(v, candidate));
+                const anyMatch = inStockVariants.some(v =>
+                    normalizeVal((v.attributes || {})[propName]) === normalizeVal(val)
+                );
+
+                return { btn, val, directMatch, anyMatch };
+            });
+
+            groupAvailability.set(propName, btnStates);
+        });
+
+        // Evitar bloqueos muertos en matrices dispersas (ej. si solo existen Roja+L y Verde+M con stock)
+        groups.forEach((group, groupIndex) => {
+            const propName = group.dataset.propName;
+            const btnStates = groupAvailability.get(propName) || [];
+
+            btnStates.forEach(state => {
+                let isEnabled = state.directMatch;
+
+                // Si no tiene stock directo con las otras selecciones actuales, pero sí existe en otra combinación:
+                // permitir el salto solo si otra propiedad no tiene otra opción distinta activa que desbloquee esta.
+                if (!isEnabled && state.anyMatch && groupIndex === 0) {
+                    const otherGroupsHaveAlternative = groups.slice(1).some(otherGrp => {
+                        const otherName = otherGrp.dataset.propName;
+                        const otherStates = groupAvailability.get(otherName) || [];
+                        return otherStates.some(
+                            s => s.directMatch && normalizeVal(s.val) !== normalizeVal(selectedAttributes[otherName])
+                        );
+                    });
+
+                    if (!otherGroupsHaveAlternative) {
+                        isEnabled = true;
+                    }
+                }
+
+                state.btn.disabled = !isEnabled;
+                state.btn.classList.toggle('unavailable', !isEnabled);
+                state.btn.setAttribute('aria-disabled', String(!isEnabled));
+                state.btn.title = isEnabled ? '' : 'Out of stock for this combination';
+            });
+        });
+    }
+
     function findMatchingVariant(changedKey = null, changedValue = null) {
         const variants = Array.isArray(currentProduct.variants) ? currentProduct.variants : [];
         if (variants.length === 0) return null;
 
-        // 1. Buscar coincidencia exacta con todos los atributos seleccionados
-        const exactMatch = variants.find(v => {
-            const attrs = v.attributes || {};
-            return Object.keys(selectedAttributes).every(key => {
-                return String(attrs[key] || '').toLowerCase() === String(selectedAttributes[key] || '').toLowerCase();
-            });
-        });
+        // 1. Coincidencia exacta con todos los atributos seleccionados (priorizando stock > 0)
+        const exactInStock = variants.find(v => Number(v.stock) > 0 && variantMatchesCriteria(v, selectedAttributes));
+        if (exactInStock) return exactInStock;
 
-        if (exactMatch) return exactMatch;
+        const exactAny = variants.find(v => variantMatchesCriteria(v, selectedAttributes));
+        if (exactAny && Number(exactAny.stock) > 0) return exactAny;
 
-        // 2. Si no existe esa combinación exacta, buscar la primera variante que tenga el atributo recién tocado
+        // 2. Si se tocó una propiedad y la combinación anterior no tenía stock, saltar a la variante con stock que tenga el atributo tocado
         if (changedKey && changedValue) {
-            const partialMatch = variants.find(v => {
-                const attrs = v.attributes || {};
-                return String(attrs[changedKey] || '').toLowerCase() === String(changedValue).toLowerCase();
-            });
-            if (partialMatch) {
-                // Sincronizar el resto de propiedades seleccionadas con esa variante válida
-                selectedAttributes = { ...(partialMatch.attributes || {}) };
+            const partialInStock = variants.find(v =>
+                Number(v.stock) > 0 &&
+                normalizeVal((v.attributes || {})[changedKey]) === normalizeVal(changedValue)
+            );
+            if (partialInStock) {
+                selectedAttributes = { ...(partialInStock.attributes || {}) };
                 syncPropertyButtonsUI();
-                return partialMatch;
+                return partialInStock;
             }
         }
 
-        return variants[0];
+        return exactAny || variants.find(v => Number(v.stock) > 0) || variants[0];
     }
 
     function syncPropertyButtonsUI() {
         document.querySelectorAll('.property-group').forEach(group => {
             const propName = group.dataset.propName;
-            const targetVal = String(selectedAttributes[propName] || '').toLowerCase();
+            const targetVal = normalizeVal(selectedAttributes[propName]);
             group.querySelectorAll('.property-btn').forEach(btn => {
-                const isMatch = btn.textContent.trim().toLowerCase() === targetVal;
+                const isMatch = normalizeVal(btn.dataset.propValue) === targetVal;
                 btn.classList.toggle('active', isMatch);
             });
         });
     }
 
-    // Actualiza precio, stock e imagen cuando cambia la variante seleccionada
     function applyVariantState(variant) {
         selectedVariant = variant;
 
@@ -247,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const activeStock = variant && variant.stock !== undefined ? Number(variant.stock) : Number(currentProduct.stock);
         const discount = Number(currentProduct.discount || 0);
 
-        // Precio y badge de descuento
         if (discount > 0) {
             if (discountBadge) {
                 discountBadge.textContent = `-${discount}%`;
@@ -262,7 +317,6 @@ document.addEventListener('DOMContentLoaded', () => {
             priceEl.textContent = `$${activePrice.toFixed(2)}`;
         }
 
-        // Stock de la variante seleccionada
         if (activeStock > 0) {
             stockLabel.textContent = `(${activeStock} in stock)`;
             stockLabel.classList.remove('text-danger');
@@ -284,7 +338,6 @@ document.addEventListener('DOMContentLoaded', () => {
             addToCartBtn.innerHTML = '<i class="fa-solid fa-cart-shopping"></i> Out of Stock';
         }
 
-        // Cambiar imagen principal a la foto de la variante si tiene una; si no, usar la imagen base
         const variantImg = variant
             ? ((Array.isArray(variant.images) && variant.images.length > 0) ? variant.images[0] : variant.image)
             : '';
@@ -296,6 +349,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (targetImage) {
             selectGalleryImageByUrl(targetImage);
         }
+
+        updateOptionAvailability();
     }
 
     function renderProductDetails(product) {
@@ -306,7 +361,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('prod-desc').textContent = product.description;
         mainImgEl.alt = product.name;
 
-        // Construir galería completa (base + variantes) y renderizar carrusel vertical
         galleryImages = buildGalleryImages(product);
         currentImageIndex = 0;
         thumbWindowStart = 0;
@@ -315,7 +369,6 @@ document.addEventListener('DOMContentLoaded', () => {
             mainImgEl.src = galleryImages[0];
         }
 
-        // Botones pequeños en gris con las colecciones debajo de la descripción (ignorando 'All')
         const categoriesContainer = document.getElementById('prod-categories');
         if (categoriesContainer && Array.isArray(product.categories)) {
             const visibleCategories = product.categories.filter(cat => cat.toLowerCase() !== 'all');
@@ -328,7 +381,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `).join('');
         }
 
-        // Renderizar propiedades dinámicas (product.options o fallback a sizes/colors/materials)
         const propertiesContainer = document.getElementById('prod-properties');
         propertiesContainer.innerHTML = '';
         selectedAttributes = {};
@@ -342,20 +394,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (product.materials?.length) optionsToRender.push({ name: 'Material', values: product.materials });
         }
 
-        // Inicializar atributos con la primera variante disponible o los primeros valores
-        const firstVariant = (Array.isArray(product.variants) && product.variants.length > 0) ? product.variants[0] : null;
+        // Arrancar siempre en la primera variante que tenga stock disponible
+        const variantsList = Array.isArray(product.variants) ? product.variants : [];
+        const initialAvailableVariant = variantsList.find(v => Number(v.stock) > 0) || variantsList[0] || null;
 
         optionsToRender.forEach(opt => {
             if (!opt.name || !Array.isArray(opt.values) || opt.values.length === 0) return;
 
-            const defaultVal = (firstVariant && firstVariant.attributes && firstVariant.attributes[opt.name])
-                ? firstVariant.attributes[opt.name]
+            const defaultVal = (initialAvailableVariant && initialAvailableVariant.attributes && initialAvailableVariant.attributes[opt.name])
+                ? initialAvailableVariant.attributes[opt.name]
                 : opt.values[0];
 
             selectedAttributes[opt.name] = defaultVal;
 
             const optionsHtml = opt.values.map(val => {
-                const isActive = String(val).toLowerCase() === String(defaultVal).toLowerCase();
+                const isActive = normalizeVal(val) === normalizeVal(defaultVal);
                 return `<button type="button" class="property-btn ${isActive ? 'active' : ''}" data-prop-name="${opt.name}" data-prop-value="${val}">${val}</button>`;
             }).join('');
 
@@ -369,13 +422,13 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
 
-        // Aplicar variante inicial (actualiza imagen, precio y stock)
         const initialVariant = findMatchingVariant();
         applyVariantState(initialVariant);
 
-        // Escuchar clics en cada botón de propiedad
         propertiesContainer.querySelectorAll('.property-btn').forEach(button => {
             button.addEventListener('click', function () {
+                if (this.disabled) return;
+
                 const propName = this.dataset.propName;
                 const propValue = this.dataset.propValue;
 
@@ -391,7 +444,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 2. Selector de cantidad respetando el stock de la variante activa
     const btnMinus = document.getElementById('btn-minus');
     const btnPlus = document.getElementById('btn-plus');
     const qtyValue = document.getElementById('qty-value');
@@ -413,13 +465,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Agregar al carrito en MySQL con precio, imagen y atributos de la variante
     const btnAddCart = document.querySelector('.btn-add-cart');
     const successMsg = document.getElementById('success-msg');
 
     if (btnAddCart) {
         btnAddCart.addEventListener('click', async () => {
             if (btnAddCart.disabled || !currentProduct) return;
+
+            if (selectedVariant && Number(selectedVariant.stock) <= 0) {
+                alert('This variant is currently out of stock.');
+                return;
+            }
 
             const currentUser = JSON.parse(localStorage.getItem('user'));
             if (!currentUser || !currentUser.id) {
@@ -456,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('../backend/api/cart.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
                     body: JSON.stringify(payload)
                 });
 
@@ -479,8 +536,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error al agregar al carrito:', error);
                 alert('Server connection error.');
             } finally {
-                btnAddCart.disabled = false;
-                btnAddCart.innerHTML = originalBtnHtml;
+                const stillInStock = selectedVariant ? Number(selectedVariant.stock) > 0 : Number(currentProduct.stock) > 0;
+                btnAddCart.disabled = !stillInStock;
+                btnAddCart.innerHTML = stillInStock
+                    ? originalBtnHtml
+                    : '<i class="fa-solid fa-cart-shopping"></i> Out of Stock';
             }
         });
     }

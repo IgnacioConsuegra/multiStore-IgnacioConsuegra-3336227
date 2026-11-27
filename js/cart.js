@@ -85,7 +85,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (item.selectedSize) variants.push(`Size: ${item.selectedSize}`);
             if (item.selectedColor) variants.push(`Color: ${item.selectedColor}`);
             if (item.selectedMaterial) variants.push(`Material: ${item.selectedMaterial}`);
-            const variantText = variants.join(' • ');
+            const attrs = item.attributes && Object.keys(item.attributes).length > 0
+                ? item.attributes
+                : {
+                    ...(item.selectedSize ? { Size: item.selectedSize } : {}),
+                    ...(item.selectedColor ? { Color: item.selectedColor } : {}),
+                    ...(item.selectedMaterial ? { Material: item.selectedMaterial } : {})
+                };
+
+            const variantText = Object.entries(attrs)
+                .filter(([, val]) => val !== null && val !== '')
+                .map(([key, val]) => `${key}: ${val}`)
+                .join(' • ');
+
+            const isOutOfStock = Number(item.stock) <= 0;
 
             // Insignia roja sobre la imagen (igual a productDetails)
             const discountBadgeHtml = hasDiscount

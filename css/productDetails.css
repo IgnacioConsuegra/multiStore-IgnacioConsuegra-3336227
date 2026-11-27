@@ -295,7 +295,21 @@ body {
     border-color: var(--btn-color);
     color: var(--paper);
 }
+.property-btn:disabled,
+.property-btn.unavailable {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+    color: #adb5bd;
+    cursor: not-allowed;
+    opacity: 0.65;
+    text-decoration: line-through;
+}
 
+.property-btn:disabled:hover,
+.property-btn.unavailable:hover {
+    border-color: #dee2e6;
+    color: #adb5bd;
+}
 /* --- Quantity Selector --- */
 .quantity-selector {
     border: 1px solid #e5e5e5;
