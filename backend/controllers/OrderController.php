@@ -26,7 +26,7 @@ class OrderController {
             }
 
             // 2. Obtener el carrito activo y sus ítems
-            $cartQuery = "SELECT 
+          $cartQuery = "SELECT 
                             c.id_carrito,
                             ci.id_carrito_item,
                             ci.id_producto,
@@ -35,7 +35,7 @@ class OrderController {
                             ci.atributos,
                             ci.imagen,
                             p.nombre,
-                            p.precio_base,
+                            (p.precio_base + COALESCE(pv.precio_delta, 0)) AS precio_base,
                             GREATEST(
                                 COALESCE(MAX(cat.porcentaje_descuento), 0),
                                 COALESCE((SELECT porcentaje_descuento FROM categorias WHERE LOWER(nombre) = 'all' LIMIT 1), 0)
@@ -43,6 +43,7 @@ class OrderController {
                           FROM carritos c
                           INNER JOIN carrito_items ci ON c.id_carrito = ci.id_carrito
                           INNER JOIN productos p ON ci.id_producto = p.id_producto
+                          LEFT JOIN producto_variantes pv ON ci.id_variante = pv.id_variante
                           LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
                           LEFT JOIN categorias cat ON pc.id_categoria = cat.id_categoria
                           WHERE c.id_usuario = :uid AND c.estado = 'active'
