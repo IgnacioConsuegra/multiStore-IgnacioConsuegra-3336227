@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = '../index.html';
         return;
     }
+
     const tbody = document.getElementById('products-tbody');
     const toggleFormBtn = document.getElementById('toggle-form-btn');
     const cancelFormBtn = document.getElementById('cancel-form-btn');
@@ -48,9 +49,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let selectedCategories = [];
     let currentVariantsState = [];
     let lastKnownBasePrice = 0;
-    let isSubmitting = false; // Bloqueo estricto contra doble envío
+    let isSubmitting = false;
 
-    // Utilidad: parsear múltiples URLs separadas por comas o saltos de línea
     function parseUrls(rawText) {
         if (!rawText) return [];
         return rawText
@@ -59,7 +59,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             .filter(u => u !== '');
     }
 
-    // Utilidad: parsear precio con punto decimal (convierte coma decimal si se escribió por error)
     function parseDecimalPrice(rawVal) {
         if (rawVal === null || rawVal === undefined) return 0;
         const normalized = String(rawVal).trim().replace(',', '.');
@@ -67,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return isNaN(num) || num < 0 ? 0 : Math.round(num * 100) / 100;
     }
 
-    // Vista previa de las imágenes base
     function updateBaseImagesPreview() {
         const urls = parseUrls(prodImagesInput.value);
         baseImagesPreview.innerHTML = urls.map(url => `
@@ -77,7 +75,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     prodImagesInput.addEventListener('input', updateBaseImagesPreview);
 
-    // Sincronizar automáticamente variantes que aún tengan el precio base anterior
     prodPriceInput.addEventListener('input', () => {
         const newBasePrice = parseDecimalPrice(prodPriceInput.value);
         const variantPriceInputs = variantsTbody.querySelectorAll('.var-price-input');
@@ -335,7 +332,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </td>
             `;
 
-            // Actualizar miniaturas de variante al escribir URLs
             const textareaEl = tr.querySelector('.var-images-input');
             const previewBox = tr.querySelector('.var-images-preview');
             textareaEl.addEventListener('input', () => {
@@ -349,7 +345,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 4. Renderizar tabla principal de productos
+    // 4. Renderizar tabla principal de productos con botón Toggle Featured
     function renderTable() {
         tbody.innerHTML = '';
 
@@ -372,6 +368,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const basePrice = product.originalPrice !== undefined ? product.originalPrice : product.price;
             const totalSold = product.sold || 0;
+            const isFeatured = Boolean(product.featured);
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -379,7 +376,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="d-flex align-items-center gap-3">
                         <img src="${product.image}" alt="${product.name}" class="product-img-table shadow-sm">
                         <div>
-                            <p class="fw-medium text-dark-custom mb-0">${product.name}</p>
+                            <div class="d-flex align-items-center gap-2">
+                                <p class="fw-medium text-dark-custom mb-0">${product.name}</p>
+                                ${isFeatured ? '<span class="badge bg-warning-subtle text-dark border border-warning-subtle" style="font-size: 0.7rem;">Featured</span>' : ''}
+                            </div>
                             <p class="small text-muted-custom mb-0">${variantsLabel}</p>
                         </div>
                     </div>
@@ -393,7 +393,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div><strong>${totalSold}</strong> sold</div>
                     ${product.discount > 0 ? `<span class="badge bg-danger mt-1">-${product.discount}%</span>` : ''}
                 </td>
-                <td class="px-4 py-3 text-end">
+                <td class="px-4 py-3 text-end text-nowrap">
+                    <button type="button" 
+                            class="btn-action featured-toggle-btn ${isFeatured ? 'text-warning' : 'text-muted'}" 
+                            onclick="toggleFeatured('${product.id}', ${!isFeatured})" 
+                            title="${isFeatured ? 'Remove from Featured' : 'Mark as Featured'}">
+                        <i class="${isFeatured ? 'fa-solid' : 'fa-regular'} fa-star"></i>
+                    </button>
                     <button type="button" class="btn-action edit" onclick="editProduct('${product.id}')" title="Edit">
                         <i class="fa-solid fa-pen"></i>
                     </button>
@@ -437,7 +443,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     toggleFormBtn.addEventListener('click', () => toggleForm(true, false));
     cancelFormBtn.addEventListener('click', () => toggleForm(false));
 
-    // 5. Guardar producto y sus variantes (protegido contra doble clic)
+    // 5. Guardar producto y sus variantes
     productForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -464,6 +470,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             variants: currentVariantsState
         };
 
+        // Si es producto nuevo, inicia en featured: false
+        if (!idField) {
+            payload.featured = false;
+        }
+
         const originalText = saveProductBtn.textContent;
         saveProductBtn.disabled = true;
         saveProductBtn.textContent = 'Saving...';
@@ -472,6 +483,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const response = await fetch('../backend/api/products.php', {
                 method: idField ? 'PUT' : 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
                 body: JSON.stringify(payload)
             });
 
@@ -493,13 +505,48 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // 6. Eliminar producto
+    // 6. Toggle Featured directo desde la tabla
+    window.toggleFeatured = async function (id, newFeaturedState) {
+        try {
+            const response = await fetch('../backend/api/products.php', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({
+                    action: 'toggle_featured',
+                    id: id,
+                    featured: newFeaturedState
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.status === 'success') {
+                const target = products.find(p => String(p.id) === String(id));
+                if (target) {
+                    target.featured = Boolean(newFeaturedState);
+                    localStorage.setItem('currentProducts', JSON.stringify(products));
+                    renderTable();
+                } else {
+                    await fetchProducts();
+                }
+            } else {
+                alert(result.message || 'Could not update featured status.');
+            }
+        } catch (error) {
+            console.error('Error toggling featured:', error);
+            alert('Server connection error.');
+        }
+    };
+
+    // 7. Eliminar producto
     window.deleteProduct = async function (id) {
         if (!confirm('Are you sure you want to delete this product?')) return;
 
         try {
             const response = await fetch(`../backend/api/products.php?id=${encodeURIComponent(id)}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: 'same-origin'
             });
             const result = await response.json();
 
@@ -514,7 +561,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     };
 
-    // 7. Cargar producto existente en el formulario de edición
+    // 8. Cargar producto existente en el formulario de edición
     window.editProduct = function (id) {
         const product = products.find(p => p.id === id);
         if (!product) return;

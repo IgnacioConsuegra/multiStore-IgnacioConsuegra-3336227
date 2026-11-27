@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Cargar productos y categorías desde el Backend PHP en paralelo
     try {
-       const [productsRes, categoriesRes] = await Promise.all([
+        const [productsRes, categoriesRes] = await Promise.all([
             fetch(`../backend/api/products.php?t=${Date.now()}`, { cache: 'no-store' }),
             fetch(`../backend/api/categories.php?t=${Date.now()}`, { cache: 'no-store' })
         ]);
@@ -39,14 +39,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 3. Construir checkboxes dinámicos desde la BD
         renderFilterOptions();
 
-        // 4. Si viene una categoría en la URL (y no es "All"), marcar su checkbox
-        if (categoryFromUrl && categoryFromUrl.toLowerCase() !== 'all') {
-            const checkboxes = document.querySelectorAll('.category-check');
-            checkboxes.forEach(cb => {
-                if (cb.value.toLowerCase() === categoryFromUrl.toLowerCase()) {
-                    cb.checked = true;
-                }
-            });
+        // 4. Si viene una categoría en la URL, cambiar filtro a 'all' y marcar su checkbox si no es "All"
+        if (categoryFromUrl) {
+            sortSelect.value = 'all';
+
+            if (categoryFromUrl.toLowerCase() !== 'all') {
+                const checkboxes = document.querySelectorAll('.category-check');
+                checkboxes.forEach(cb => {
+                    if (cb.value.toLowerCase() === categoryFromUrl.toLowerCase()) {
+                        cb.checked = true;
+                    }
+                });
+            }
         }
 
         // 5. Aplicar filtros iniciales y renderizar
@@ -63,7 +67,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Genera los checkboxes de Categorías, Tallas, Colores y Materiales desde los datos reales
     function renderFilterOptions() {
-        // Categorías (omitimos "All" porque desmarcar todo ya muestra todos los productos)
         const validCategories = allCategories.filter(c => c.name.toLowerCase() !== 'all');
         categoryContainer.innerHTML = validCategories.map(cat => `
             <label class="custom-checkbox d-flex align-items-center gap-2">
@@ -72,7 +75,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             </label>
         `).join('');
 
-        // Extraer valores únicos de tallas, colores y materiales de los productos cargados
         const uniqueSizes = [...new Set(allProducts.flatMap(p => p.sizes || []))];
         const uniqueColors = [...new Set(allProducts.flatMap(p => p.colors || []))];
         const uniqueMaterials = [...new Set(allProducts.flatMap(p => p.materials || []))];
@@ -98,14 +100,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             </label>
         `).join('');
 
-        // Escuchar cambios en todos los checkboxes recién creados
         document.querySelectorAll('.filter-check').forEach(checkbox => {
             checkbox.addEventListener('change', applyFiltersAndSort);
         });
     }
 
     // Filtra y ordena el arreglo de productos
-   // Filtra y ordena el arreglo de productos
     function applyFiltersAndSort() {
         const searchTerm = searchInput.value.toLowerCase().trim();
         const sortBy = sortSelect.value;
@@ -118,6 +118,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const selectedMaterials = getCheckedValues('.material-check');
 
         let filtered = allProducts.filter(product => {
+            // 0. Filtro estricto de Featured cuando la opción seleccionada es 'featured'
+            const matchesFeatured = sortBy !== 'featured' || Boolean(product.featured);
+
             // 1. Filtro de búsqueda por texto
             const matchesSearch = !searchTerm ||
                 product.name.toLowerCase().includes(searchTerm) ||
@@ -147,14 +150,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             // 7. Filtro de Sale (solo productos con descuento > 0 si está seleccionada la opción)
             const matchesSale = sortBy !== 'sale' || Number(product.discount) > 0;
 
-            return matchesSearch && matchesCategory && matchesSize && matchesColor && matchesMaterial && matchesPrice && matchesSale;
+            return matchesFeatured && matchesSearch && matchesCategory && matchesSize && matchesColor && matchesMaterial && matchesPrice && matchesSale;
         });
 
         // Ordenamiento
         filtered.sort((a, b) => {
             switch (sortBy) {
                 case 'sale':
-                    // Ordena de mayor a menor porcentaje de descuento
                     return Number(b.discount) - Number(a.discount);
                 case 'price-low':
                     return Number(a.price) - Number(b.price);
@@ -164,6 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return a.name.localeCompare(b.name);
                 case 'rating':
                     return (b.rating || 5) - (a.rating || 5);
+                case 'all':
                 case 'featured':
                 default:
                     return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);

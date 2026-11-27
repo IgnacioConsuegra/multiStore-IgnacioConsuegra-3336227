@@ -31,7 +31,12 @@ if ($method === 'GET') {
         echo json_encode(["status" => "error", "message" => "ID de producto requerido"]);
         exit();
     }
-    $controller->update($data);
+
+    if (isset($data['action']) && $data['action'] === 'toggle_featured') {
+        $controller->toggleFeatured($data['id'], !empty($data['featured']));
+    } else {
+        $controller->update($data);
+    }
 
 } elseif ($method === 'DELETE') {
     requireAdmin();
