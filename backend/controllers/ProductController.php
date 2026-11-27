@@ -90,14 +90,15 @@ class ProductController {
         }
     }
 
-    public function create($data) {
+  public function create($data) {
         try {
             $this->conn->beginTransaction();
 
             $nombre = trim($data['name'] ?? '');
             $descripcion = trim($data['description'] ?? '');
             $precioBase = (float)($data['price'] ?? 0);
-            $destacado = isset($data['featured']) ? (int)$data['featured'] : 1;
+            // Ahora inicia en 0 (no destacado) por defecto
+            $destacado = isset($data['featured']) ? (int)(bool)$data['featured'] : 0;
 
             $baseImages = $this->normalizeImagesArray($data['images'] ?? ($data['image'] ?? []));
             $imagenesJson = json_encode($baseImages, JSON_UNESCAPED_UNICODE);
@@ -128,6 +129,35 @@ class ProductController {
             $this->conn->rollBack();
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Error al crear producto: " . $e->getMessage()]);
+        }
+    }
+
+    public function toggleFeatured($id, $featured) {
+        $productId = (int)$id;
+        $newStatus = $featured ? 1 : 0;
+
+        if ($productId <= 0) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "ID de producto inválido"]);
+            return;
+        }
+
+        try {
+            $stmt = $this->conn->prepare("UPDATE productos SET destacado = :destacado WHERE id_producto = :id");
+            $stmt->execute([
+                ':destacado' => $newStatus,
+                ':id' => $productId
+            ]);
+
+            http_response_code(200);
+            echo json_encode([
+                "status" => "success",
+                "featured" => (bool)$newStatus,
+                "message" => $newStatus ? "Producto marcado como destacado" : "Producto quitado de destacados"
+            ]);
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Error al cambiar estado destacado: " . $e->getMessage()]);
         }
     }
 

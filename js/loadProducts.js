@@ -2,14 +2,58 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('featured-products-grid');
     if (!grid) return;
 
+    function setupHorizontalCarousel(trackEl) {
+        if (trackEl.parentElement.classList.contains('horizontal-carousel-wrapper')) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'horizontal-carousel-wrapper';
+        trackEl.parentNode.insertBefore(wrapper, trackEl);
+        wrapper.appendChild(trackEl);
+
+        const prevBtn = document.createElement('button');
+        prevBtn.type = 'button';
+        prevBtn.className = 'carousel-nav-btn prev-btn';
+        prevBtn.setAttribute('aria-label', 'Anterior');
+        prevBtn.innerHTML = '<i class="fa-solid fa-chevron-left"></i>';
+
+        const nextBtn = document.createElement('button');
+        nextBtn.type = 'button';
+        nextBtn.className = 'carousel-nav-btn next-btn';
+        nextBtn.setAttribute('aria-label', 'Siguiente');
+        nextBtn.innerHTML = '<i class="fa-solid fa-chevron-right"></i>';
+
+        wrapper.appendChild(prevBtn);
+        wrapper.appendChild(nextBtn);
+
+        const updateButtons = () => {
+            const maxScroll = trackEl.scrollWidth - trackEl.clientWidth;
+            prevBtn.disabled = trackEl.scrollLeft <= 2;
+            nextBtn.disabled = maxScroll <= 2 || trackEl.scrollLeft >= maxScroll - 2;
+        };
+
+        const scrollStep = () => Math.max(trackEl.clientWidth * 0.75, 260);
+
+        prevBtn.addEventListener('click', () => {
+            trackEl.scrollBy({ left: -scrollStep(), behavior: 'smooth' });
+        });
+
+        nextBtn.addEventListener('click', () => {
+            trackEl.scrollBy({ left: scrollStep(), behavior: 'smooth' });
+        });
+
+        trackEl.addEventListener('scroll', updateButtons, { passive: true });
+        window.addEventListener('resize', updateButtons);
+        setTimeout(updateButtons, 100);
+    }
+
     const renderProducts = (products) => {
-        grid.innerHTML = ''; 
-        
+        grid.innerHTML = '';
+
         const featured = products.filter(p => p.featured);
-        const toRender = (featured.length > 0 ? featured : products).slice(0, 4);
+        const toRender = (featured.length > 0 ? featured : products).slice(0, 30);
 
         toRender.forEach((product, index) => {
-            const delay = index * 100;
+            const delay = Math.min(index * 80, 600);
             const hasDiscount = product.discount > 0;
 
             const discountBadge = hasDiscount
@@ -24,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 : `<p class="product-price mb-0">$${Number(product.price).toFixed(2)}</p>`;
 
             const card = `
-                <div class="col-12 col-sm-6 col-lg-3 animate-slide-up" style="animation-delay: ${delay}ms;">
+                <div class="col-9 col-sm-6 col-lg-3 animate-slide-up" style="animation-delay: ${delay}ms;">
                     <div class="product-card position-relative">
                         ${discountBadge}
                         <a href="views/productDetails.html?id=${product.id}" class="text-decoration-none d-block">
@@ -46,6 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             grid.innerHTML += card;
         });
+
+        setupHorizontalCarousel(grid);
     };
 
     // Fetch hacia la API en PHP (ruta relativa desde index.html)
@@ -55,13 +101,11 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(products => {
-            // Sincronizamos con localStorage para que addToCart siga encontrando el producto
             localStorage.setItem('currentProducts', JSON.stringify(products));
             renderProducts(products);
         })
         .catch(error => {
             console.error('Error cargando los productos desde la BD:', error);
-            // Respaldo con caché local si falla la red
             const cachedProducts = JSON.parse(localStorage.getItem('currentProducts'));
             if (cachedProducts) {
                 renderProducts(cachedProducts);

@@ -6,7 +6,7 @@ class OrderController {
         $this->conn = $db;
     }
 
-    public function processCheckout($userId) {
+   public function processCheckout($userId) {
         $userId = (int)$userId;
 
         try {
@@ -26,7 +26,7 @@ class OrderController {
             }
 
             // 2. Obtener el carrito activo y sus ítems
-            $cartQuery = "SELECT 
+          $cartQuery = "SELECT 
                             c.id_carrito,
                             ci.id_carrito_item,
                             ci.id_producto,
@@ -35,7 +35,7 @@ class OrderController {
                             ci.atributos,
                             ci.imagen,
                             p.nombre,
-                            p.precio_base,
+                            (p.precio_base + COALESCE(pv.precio_delta, 0)) AS precio_base,
                             GREATEST(
                                 COALESCE(MAX(cat.porcentaje_descuento), 0),
                                 COALESCE((SELECT porcentaje_descuento FROM categorias WHERE LOWER(nombre) = 'all' LIMIT 1), 0)
@@ -43,6 +43,7 @@ class OrderController {
                           FROM carritos c
                           INNER JOIN carrito_items ci ON c.id_carrito = ci.id_carrito
                           INNER JOIN productos p ON ci.id_producto = p.id_producto
+                          LEFT JOIN producto_variantes pv ON ci.id_variante = pv.id_variante
                           LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
                           LEFT JOIN categorias cat ON pc.id_categoria = cat.id_categoria
                           WHERE c.id_usuario = :uid AND c.estado = 'active'
@@ -62,42 +63,66 @@ class OrderController {
 
             $cartId = (int)$items[0]['id_carrito'];
 
-            // 3. Validar stock y calcular el monto total
+            // 3. Validar disponibilidad exacta de cada variante con bloqueo FOR UPDATE
             $subtotal = 0;
             $preparedItems = [];
 
+            $lockVarStmt = $this->conn->prepare("SELECT id_variante, atributos, stock, precio_delta 
+                                                 FROM producto_variantes 
+                                                 WHERE id_variante = :vid AND id_producto = :pid 
+                                                 FOR UPDATE");
+
             foreach ($items as $item) {
                 $prodId = (int)$item['id_producto'];
+                $varId = (int)$item['id_variante'];
                 $qty = (int)$item['cantidad'];
 
-                $stockStmt = $this->conn->prepare("SELECT COALESCE(SUM(stock), 0) AS total_stock FROM producto_variantes WHERE id_producto = :pid FOR UPDATE");
-                $stockStmt->bindParam(':pid', $prodId, PDO::PARAM_INT);
-                $stockStmt->execute();
-                $availableStock = (int)$stockStmt->fetch()['total_stock'];
+                $lockVarStmt->execute([
+                    ':vid' => $varId,
+                    ':pid' => $prodId
+                ]);
+                $variantRow = $lockVarStmt->fetch();
 
+                $attrs = json_decode($item['atributos'] ?? '{}', true) ?: [];
+                $variantDesc = !empty($attrs)
+                    ? ' (' . implode(', ', array_map(fn($k, $v) => "$k: $v", array_keys($attrs), $attrs)) . ')'
+                    : '';
+
+                if (!$variantRow || (int)$variantRow['stock'] <= 0) {
+                    $this->conn->rollBack();
+                    http_response_code(400);
+                    echo json_encode([
+                        "status" => "error",
+                        "message" => "Variante no disponible (sin stock): " . $item['nombre'] . $variantDesc
+                    ]);
+                    return;
+                }
+
+                $availableStock = (int)$variantRow['stock'];
                 if ($availableStock < $qty) {
                     $this->conn->rollBack();
                     http_response_code(400);
                     echo json_encode([
                         "status" => "error",
-                        "message" => "Stock insuficiente para: " . $item['nombre']
+                        "message" => "Stock insuficiente para {$item['nombre']}{$variantDesc} (disponible: {$availableStock})."
                     ]);
                     return;
                 }
 
-                $basePrice = (float)$item['precio_base'];
+                $basePrice = (float)$item['precio_base'] + (float)($variantRow['precio_delta'] ?? 0);
                 $discount = (float)$item['max_descuento'];
-                $unitPrice = $discount > 0 ? round($basePrice * (1 - ($discount / 100)), 2) : $basePrice;
+                $unitPrice = $discount > 0 ? round($basePrice * (1 - ($discount / 100)), 2) : round($basePrice, 2);
 
                 $subtotal += ($unitPrice * $qty);
 
                 $preparedItems[] = [
                     'id_producto' => $prodId,
-                    'id_variante' => (int)$item['id_variante'],
+                    'id_variante' => $varId,
                     'cantidad' => $qty,
                     'precio' => $unitPrice,
                     'atributos' => $item['atributos'],
-                    'imagen' => $item['imagen']
+                    'imagen' => $item['imagen'],
+                    'nombre' => $item['nombre']
                 ];
             }
 
@@ -121,10 +146,14 @@ class OrderController {
 
             $orderId = (int)$this->conn->lastInsertId();
 
-            // 5. Insertar ítems de la orden y descontar stock
+            // 5. Insertar ítems de la orden y descontar stock de la variante exacta
             $insertOrderItem = $this->conn->prepare("INSERT INTO ordenes_items 
                 (id_orden, id_producto, id_variante, cantidad, precio, atributos, imagen) 
                 VALUES (:oid, :pid, :vid, :qty, :price, :attrs, :img)");
+
+            $deductVarStmt = $this->conn->prepare("UPDATE producto_variantes 
+                                                   SET stock = stock - :qty, vendidos = vendidos + :qty 
+                                                   WHERE id_variante = :vid AND stock >= :qty");
 
             foreach ($preparedItems as $pItem) {
                 $insertOrderItem->execute([
@@ -137,22 +166,13 @@ class OrderController {
                     ':img' => $pItem['imagen']
                 ]);
 
-                $remainingToDeduct = $pItem['cantidad'];
-                $varsStmt = $this->conn->prepare("SELECT id_variante, stock FROM producto_variantes WHERE id_producto = :pid AND stock > 0 ORDER BY id_variante ASC");
-                $varsStmt->execute([':pid' => $pItem['id_producto']]);
-                $variants = $varsStmt->fetchAll();
+                $deductVarStmt->execute([
+                    ':qty' => $pItem['cantidad'],
+                    ':vid' => $pItem['id_variante']
+                ]);
 
-                foreach ($variants as $v) {
-                    if ($remainingToDeduct <= 0) break;
-                    $deduct = min((int)$v['stock'], $remainingToDeduct);
-
-                    $updVar = $this->conn->prepare("UPDATE producto_variantes SET stock = stock - :deduct, vendidos = vendidos + :deduct WHERE id_variante = :vid");
-                    $updVar->execute([
-                        ':deduct' => $deduct,
-                        ':vid' => (int)$v['id_variante']
-                    ]);
-
-                    $remainingToDeduct -= $deduct;
+                if ($deductVarStmt->rowCount() === 0) {
+                    throw new Exception("No se pudo descontar el stock de la variante para " . $pItem['nombre']);
                 }
             }
 
