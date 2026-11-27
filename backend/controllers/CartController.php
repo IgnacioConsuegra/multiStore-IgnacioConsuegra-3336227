@@ -204,22 +204,29 @@ class CartController {
         }
     }
 
-    public function getCartByUser($userId) {
+public function getCartByUser($userId) {
         $query = "SELECT 
                     ci.id_carrito_item AS itemId,
                     ci.id_producto AS id,
                     ci.id_variante AS variantId,
                     p.nombre AS name,
-                    ci.precio AS price,
+                    (p.precio_base + COALESCE(pv.precio_delta, 0)) AS original_price,
                     ci.imagen AS image,
                     ci.cantidad AS quantity,
                     ci.atributos AS attributes,
-                    COALESCE(pv.stock, 0) AS stock
+                    COALESCE(pv.stock, 0) AS stock,
+                    GREATEST(
+                        COALESCE(MAX(cat.porcentaje_descuento), 0),
+                        COALESCE((SELECT porcentaje_descuento FROM categorias WHERE LOWER(nombre) = 'all' LIMIT 1), 0)
+                    ) AS max_descuento
                   FROM carritos c
                   INNER JOIN carrito_items ci ON c.id_carrito = ci.id_carrito
                   INNER JOIN productos p ON ci.id_producto = p.id_producto
                   LEFT JOIN producto_variantes pv ON ci.id_variante = pv.id_variante
+                  LEFT JOIN producto_categorias pc ON p.id_producto = pc.id_producto
+                  LEFT JOIN categorias cat ON pc.id_categoria = cat.id_categoria
                   WHERE c.id_usuario = :userId AND c.estado = 'active'
+                  GROUP BY ci.id_carrito_item
                   ORDER BY ci.id_carrito_item DESC";
 
         $stmt = $this->conn->prepare($query);
@@ -229,12 +236,20 @@ class CartController {
 
         $items = array_map(function($row) {
             $attrs = json_decode($row['attributes'], true) ?: [];
+            $originalPrice = (float)$row['original_price'];
+            $discount = (float)$row['max_descuento'];
+            $finalPrice = $discount > 0
+                ? round($originalPrice * (1 - ($discount / 100)), 2)
+                : $originalPrice;
+
             return [
                 "itemId" => (int)$row['itemId'],
                 "id" => (string)$row['id'],
                 "variantId" => (int)$row['variantId'],
                 "name" => $row['name'],
-                "price" => (float)$row['price'],
+                "price" => $finalPrice,
+                "originalPrice" => $originalPrice,
+                "discount" => $discount,
                 "image" => $row['image'],
                 "quantity" => (int)$row['quantity'],
                 "stock" => (int)$row['stock'],

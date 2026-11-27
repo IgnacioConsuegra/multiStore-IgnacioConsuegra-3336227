@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchCart() {
         try {
             const response = await fetch(`../backend/api/cart.php?userId=${encodeURIComponent(currentUser.id)}`, {
-                method: 'GET',  
+                method: 'GET',
                 credentials: 'same-origin'
             });
             if (!response.ok) throw new Error('Error al cargar el carrito');
@@ -58,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. Renderizar lista de productos y resumen
-  // 2. Renderizar lista de productos y resumen
     function renderCart() {
         if (!cartItems || cartItems.length === 0) {
             showEmptyState();
@@ -73,9 +72,13 @@ document.addEventListener('DOMContentLoaded', () => {
         let totalUnits = 0;
 
         cartItems.forEach(item => {
-            const hasDiscount = item.discount > 0;
-            const itemTotal = item.price * item.quantity;
-            const itemOriginalTotal = item.originalPrice * item.quantity;
+            const discountPercent = Number(item.discount || 0);
+            const price = Number(item.price || 0);
+            const originalPrice = Number(item.originalPrice || price);
+            const hasDiscount = discountPercent > 0;
+
+            const itemTotal = price * item.quantity;
+            const itemOriginalTotal = originalPrice * item.quantity;
 
             subtotal += itemTotal;
             totalUnits += item.quantity;
@@ -85,33 +88,20 @@ document.addEventListener('DOMContentLoaded', () => {
             if (item.selectedSize) variants.push(`Size: ${item.selectedSize}`);
             if (item.selectedColor) variants.push(`Color: ${item.selectedColor}`);
             if (item.selectedMaterial) variants.push(`Material: ${item.selectedMaterial}`);
-            const attrs = item.attributes && Object.keys(item.attributes).length > 0
-                ? item.attributes
-                : {
-                    ...(item.selectedSize ? { Size: item.selectedSize } : {}),
-                    ...(item.selectedColor ? { Color: item.selectedColor } : {}),
-                    ...(item.selectedMaterial ? { Material: item.selectedMaterial } : {})
-                };
+            const variantText = variants.join(' • ');
 
-            const variantText = Object.entries(attrs)
-                .filter(([, val]) => val !== null && val !== '')
-                .map(([key, val]) => `${key}: ${val}`)
-                .join(' • ');
-
-            const isOutOfStock = Number(item.stock) <= 0;
-
-            // Insignia roja sobre la imagen (igual a productDetails)
+            // Insignia roja sobre la imagen (esquina superior derecha)
             const discountBadgeHtml = hasDiscount
-                ? `<span class="badge bg-danger position-absolute top-0 end-0 m-1" style="font-size: 0.7rem;">-${item.discount}%</span>`
+                ? `<span class="badge bg-danger position-absolute top-0 end-0 m-1 z-2" style="font-size: 0.7rem;">-${discountPercent}%</span>`
                 : '';
 
             // Precio unitario (tachado + rojo si tiene descuento)
             const unitPriceHtml = hasDiscount
                 ? `<p class="mb-0">
-                       <span class="text-muted text-decoration-line-through small me-2">$${Number(item.originalPrice).toFixed(2)}</span>
-                       <span class="text-danger fw-bold">$${Number(item.price).toFixed(2)}</span>
+                       <span class="text-muted text-decoration-line-through small me-2">$${originalPrice.toFixed(2)}</span>
+                       <span class="text-danger fw-bold">$${price.toFixed(2)}</span>
                    </p>`
-                : `<p class="fw-medium text-dark-custom mb-0">$${Number(item.price).toFixed(2)}</p>`;
+                : `<p class="fw-medium text-dark-custom mb-0">$${price.toFixed(2)}</p>`;
 
             // Total de la fila (cantidad * precio)
             const rowTotalHtml = hasDiscount
@@ -230,6 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('../backend/api/cart.php', {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'same-origin',
                 body: JSON.stringify({ itemId, quantity: newQuantity })
             });
 
@@ -244,7 +235,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function deleteCartItem(itemId) {
         try {
             const response = await fetch(`../backend/api/cart.php?itemId=${itemId}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                credentials: 'same-origin'
             });
 
             if (response.ok) {
@@ -255,15 +247,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 5. Botón Proceed to Checkout
-// 5. Botón Proceed to Checkout (con modal de procesamiento de 3 segundos)
+    // 5. Botón Proceed to Checkout (con modal de procesamiento de 3 segundos)
     if (checkoutBtn) {
         checkoutBtn.addEventListener('click', async () => {
             if (!currentUser || !currentUser.id || cartItems.length === 0) return;
 
             checkoutBtn.disabled = true;
 
-            // Crear cuadro modal superpuesto dinámicamente
             const overlay = document.createElement('div');
             overlay.id = 'payment-overlay';
             overlay.style.cssText = `
@@ -288,15 +278,14 @@ document.addEventListener('DOMContentLoaded', () => {
             overlay.appendChild(modalBox);
             document.body.appendChild(overlay);
 
-            // Promesa de espera mínima de 3 segundos
             const delay3Seconds = new Promise(resolve => setTimeout(resolve, 3000));
 
             try {
-                // Ejecutar la petición al servidor y la espera de 3 segundos en paralelo
                 const [response] = await Promise.all([
                     fetch('../backend/api/checkout.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
+                        credentials: 'same-origin',
                         body: JSON.stringify({ userId: currentUser.id })
                     }),
                     delay3Seconds
@@ -305,7 +294,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const result = await response.json();
 
                 if (response.ok && result.status === 'success') {
-                    // Mostrar confirmación de éxito
                     modalBox.innerHTML = `
                         <div class="text-success mb-3">
                             <i class="fa-solid fa-circle-check" style="font-size: 3.5rem;"></i>
@@ -314,11 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-muted-custom small mb-0">Orden generada con éxito.</p>
                     `;
 
-                    // Limpiar el carrito en memoria y actualizar la vista
                     cartItems = [];
                     renderCart();
 
-                    // Cerrar el cuadro después de 2 segundos
                     setTimeout(() => {
                         overlay.remove();
                         checkoutBtn.disabled = false;
